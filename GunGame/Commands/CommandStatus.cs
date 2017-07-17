@@ -56,9 +56,9 @@ namespace GunGame.Commands
 		public void Execute(IRocketPlayer caller, string [] command)
 		{
 			if (GameManager.isRunning) {
-				GunGame.Say (caller, "inprogress", Color.green, GameManager.timer);
+				GunGame.Say (caller, "inprogress", Color.green, GunGame.GetTime ());
 			} else if (GameManager.isWaiting) {
-				GunGame.Say (caller, "next", Color.green, GameManager.timer);
+				GunGame.Say (caller, "next", Color.green, GunGame.GetTime ());
 			} else {
 				GunGame.Say (caller, "notenoughplayers", Color.green, GunGameConfig.instance.minPlayers - GameManager.OnlinePlayers.Count);
 			}

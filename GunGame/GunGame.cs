@@ -16,6 +16,7 @@ using Newtonsoft.Json.Converters;
 using SDG.Unturned;
 
 using GunGame.Managers;
+using System;
 
 namespace GunGame
 {
@@ -44,6 +45,15 @@ namespace GunGame
 		void FixedUpdate()
 		{
 			GameManager.Update ();
+		}
+
+		public static int GetTime()
+		{
+			float timer = (float)GameManager.timer;
+
+			timer = timer / 60;
+
+			return Mathf.RoundToInt (timer);
 		}
 
 		public override TranslationList DefaultTranslations
@@ -120,8 +130,11 @@ namespace GunGame
 				string file = File.ReadAllText (Directory);
 
 				try {
-					instance = (GunGameConfig)JsonConvert.DeserializeObject (file);
-				} catch {
+					instance = JsonConvert.DeserializeObject<GunGameConfig> (file);
+				} catch (Exception e) {
+
+					Rocket.Core.Logging.Logger.LogException (e, null);
+
 					Rocket.Core.Logging.Logger.LogWarning ("Config failed to load, reverting to default settings...");
 					File.WriteAllText (DirectoryFail, file);
 					LoadDefaultConfig ();
@@ -137,7 +150,7 @@ namespace GunGame
 		{
 			GunGameConfig config = new GunGameConfig ();
 
-			config.maxRoundTime = 300;
+			config.maxRoundTime = 36000;
 			config.minPlayers = 8;
 			config.broadcastKills = true;
 			config.mutePlayers = true;

@@ -15,15 +15,15 @@ namespace GunGame.Managers
 		public static bool isRunning;
 		public static bool isWaiting;
 
-		public static List<UnturnedPlayer> OnlinePlayers;
-		public static List<UnturnedPlayer> InGamePlayers;
+		public static List<ulong> OnlinePlayers;
+		public static List<ulong> InGamePlayers;
 
 		static int lastSpawn = 0;
 
 		public static void Initialize()
 		{
-			OnlinePlayers = new List<UnturnedPlayer> ();
-			InGamePlayers = new List<UnturnedPlayer> ();
+			OnlinePlayers = new List<ulong> ();
+			InGamePlayers = new List<ulong> ();
 
 			timer = 0;
 			isWaiting = false;
@@ -43,7 +43,7 @@ namespace GunGame.Managers
 			} else if (isWaiting) {
 				if (timer > 0) {
 
-					if (timer == 5)
+					if (timer == 300)
 						GunGame.Say ("next", Color.green, "5");
 
 					timer--;
@@ -62,21 +62,27 @@ namespace GunGame.Managers
 			isRunning = false;
 			isWaiting = true;
 
-			timer = 30;
+			timer = 1800;
 
-			foreach (UnturnedPlayer player in InGamePlayers) {
-				player.GunGamePlayer ().ClearInv ();
-				player.Teleport (GunGameConfig.instance.safezone.Vector3, 0);
+			foreach (ulong player in InGamePlayers) {
+				player.GetPlayer ().GunGamePlayer ().ClearInv ();
+				player.GetPlayer ().Teleport (GunGameConfig.instance.safezone.Vector3, 0);
 			}
 
-			IEnumerable<UnturnedPlayer> winners = from player in InGamePlayers
-												  orderby player.GunGamePlayer ().currentWeapon descending
-												  select player;
+			IEnumerable<ulong> winners = from player in InGamePlayers
+										 orderby player.GetPlayer ().GunGamePlayer ().currentWeapon descending
+										 select player;
 
-			GunGame.Say ("first", Color.cyan, winners.ElementAt (0).DisplayName);
-			GunGame.Say ("second", Color.cyan, winners.ElementAt (1).DisplayName);
-			GunGame.Say ("third", Color.cyan, winners.ElementAt (2).DisplayName);
-			GunGame.Say ("next", Color.green, "30");
+			UnturnedPlayer first = winners.ElementAt (0).GetPlayer ();
+			first.GunGamePlayer ().data.first++;
+			UnturnedPlayer second = winners.ElementAt (1).GetPlayer ();
+			second.GunGamePlayer ().data.second++;
+			UnturnedPlayer third = winners.ElementAt (2).GetPlayer ();
+			third.GunGamePlayer ().data.third++;
+
+			GunGame.Say ("first", Color.cyan, first.DisplayName);
+			GunGame.Say ("second", Color.cyan, second.DisplayName);
+			GunGame.Say ("third", Color.cyan, third.DisplayName);
 
 			InGamePlayers.Clear ();
 		}
@@ -88,14 +94,15 @@ namespace GunGame.Managers
 			isRunning = true;
 			timer = GunGameConfig.instance.maxRoundTime;
 
-			foreach (UnturnedPlayer player in OnlinePlayers) {
+			foreach (ulong player in OnlinePlayers) {
 				InGamePlayers.Add (player);
-				player.Teleport (GetSpawnPositionRR (), 0);
+				player.GetPlayer ().Teleport (GetSpawnPositionRR (), 0);
+				player.GetPlayer ().GunGamePlayer ().EnterGame ();
 			}
 
 		}
 
-		public static bool IsPlayerInGame(UnturnedPlayer player)
+		public static bool IsPlayerInGame(ulong player)
 		{
 			return InGamePlayers.Contains (player);
 		}
@@ -103,7 +110,7 @@ namespace GunGame.Managers
 		public static Vector3 GetSpawnPositionRR()
 		{
 
-			Vector3 vect = GunGameConfig.instance.positions [0].Vector3;
+			Vector3 vect = GunGameConfig.instance.positions [lastSpawn].Vector3;
 
 			if (lastSpawn == GunGameConfig.instance.positions.Length - 1) {
 				lastSpawn = 0;

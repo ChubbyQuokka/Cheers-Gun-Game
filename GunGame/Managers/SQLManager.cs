@@ -74,7 +74,7 @@ namespace GunGame.Managers
 
 			Connection.Open ();
 			cmd.ExecuteNonQuery ();
-			Connection.Clone ();
+			Connection.Close ();
 		}
 
 		public struct PlayerQuery

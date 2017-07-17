@@ -1,4 +1,7 @@
-﻿using Rocket.Unturned.Items;
+﻿using System.Collections;
+using System.Collections.Generic;
+
+using Rocket.Unturned.Items;
 using Rocket.Unturned.Player;
 
 using SDG.Unturned;
@@ -33,6 +36,7 @@ namespace GunGame
 		{
 			currentWeapon = 0;
 			GiveKit (currentWeapon);
+			data.rounds++;
 		}
 
 		public void DeathCallback(bool wasByKnife)
@@ -46,7 +50,14 @@ namespace GunGame
 
 		public void RespawnCallback()
 		{
-			GiveKit (currentWeapon);
+			if (GameManager.isRunning) {
+				GiveKit (currentWeapon);
+				Invoke ("TeleportAfterRespawn", 3);
+			}
+		}
+
+		void TeleportAfterRespawn()
+		{
 			Player.Teleport (GameManager.GetSpawnPositionRR (), 0);
 		}
 
@@ -75,11 +86,14 @@ namespace GunGame
 		{
 			Item primary = GunGameConfig.instance.weapons.weapons [kit].GetUnturnedItem ();
 			Item secondary = UnturnedItems.AssembleItem (GunGameConfig.instance.weapons.secondary, 1, 100, null);
-			Item mag = UnturnedItems.AssembleItem (GunGameConfig.instance.weapons.weapons [kit].mag, 2, 100, null);
+			Item mag = UnturnedItems.AssembleItem (GunGameConfig.instance.weapons.weapons [kit].mag, GunGameConfig.instance.weapons.weapons [kit].ammo, 100, null);
 
 			Player.Inventory.items [0].tryAddItem (primary);
 			Player.Inventory.items [1].tryAddItem (secondary);
 			Player.Inventory.items [2].tryAddItem (mag);
+			Player.Inventory.items [2].tryAddItem (mag);
+
+			Player.Player.equipment.tellAskEquip (Player.CSteamID, 0, 0, 0);
 		}
 	}
 }
@@ -91,5 +105,13 @@ namespace Rocket.Unturned.Player
 		{
 			return player.GetComponent<GunGamePlayerComponent> ();
 		}
+	}
+}
+
+public static class UInt64Extensions
+{
+	public static UnturnedPlayer GetPlayer(this ulong id)
+	{
+		return UnturnedPlayer.FromCSteamID (new Steamworks.CSteamID (id));
 	}
 }
