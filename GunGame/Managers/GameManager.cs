@@ -17,6 +17,8 @@ namespace GunGame.Managers
 		public static List<UnturnedPlayer> OnlinePlayers;
 		public static List<UnturnedPlayer> InGamePlayers;
 
+		static int lastSpawn = 0;
+
 		public static void Initialize()
 		{
 			OnlinePlayers = new List<UnturnedPlayer> ();
@@ -82,11 +84,30 @@ namespace GunGame.Managers
 		{
 			isRunning = true;
 			timer = GunGameConfig.instance.maxRoundTime;
+
+			foreach (UnturnedPlayer player in OnlinePlayers) {
+				InGamePlayers.Add (player);
+				player.Teleport (GetSpawnPositionRR (), 0);
+			}
+
 		}
 
 		public static bool IsPlayerInGame(UnturnedPlayer player)
 		{
 			return InGamePlayers.Contains (player);
+		}
+
+		public static Vector3 GetSpawnPositionRR()
+		{
+
+			Vector3 vect = GunGameConfig.instance.positions [0].Vector3;
+
+			if (lastSpawn == GunGameConfig.instance.positions.Length - 1) {
+				lastSpawn = 0;
+			} else {
+				lastSpawn++;
+			}
+			return vect;
 		}
 	}
 }

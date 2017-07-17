@@ -28,7 +28,7 @@ namespace GunGame.Managers
 
 		}
 
-		public static PlayerQuery LoadPlayer(ulong steamId, out bool wasFirstTime)
+		public static PlayerQuery LoadPlayer(ulong steamId)
 		{
 			PlayerQuery query = new PlayerQuery ();
 
@@ -38,7 +38,6 @@ namespace GunGame.Managers
 
 			Connection.Open ();
 			MySqlDataReader dr = cmd.ExecuteReader ();
-			Connection.Clone ();
 
 			if (dr.Read ()) {
 				query.kills = (int)dr [0];
@@ -48,7 +47,6 @@ namespace GunGame.Managers
 				query.second = (int)dr [4];
 				query.third = (int)dr [5];
 				query.isFirstQuery = false;
-				wasFirstTime = false;
 			} else {
 				query.kills = 0;
 				query.deaths = 0;
@@ -57,8 +55,10 @@ namespace GunGame.Managers
 				query.second = 0;
 				query.third = 0;
 				query.isFirstQuery = true;
-				wasFirstTime = true;
 			}
+
+			Connection.Close ();
+
 			return query;
 		}
 

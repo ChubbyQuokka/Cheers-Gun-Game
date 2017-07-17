@@ -59,6 +59,7 @@ namespace GunGame.Managers
 
 		static void OnPlayerRevive(UnturnedPlayer player, Vector3 pos, byte angle)
 		{
+			player.Teleport (GunGameConfig.instance.safezone.Vector3, 0);
 			player.GunGamePlayer ().RespawnCallback ();
 		}
 
@@ -70,7 +71,9 @@ namespace GunGame.Managers
 
 		static void OnPlayerJoin(UnturnedPlayer player)
 		{
-			player.Teleport (GunGameConfig.instance.safezone.Vector3, 0);
+			if (GunGameConfig.instance.safezone.x != 0 && GunGameConfig.instance.safezone.y != 0 && GunGameConfig.instance.safezone.z != 0) {
+				player.Teleport (GunGameConfig.instance.safezone.Vector3, 0);
+			}
 			GameManager.OnlinePlayers.Add (player);
 		}
 
@@ -82,8 +85,6 @@ namespace GunGame.Managers
 			if (GameManager.IsPlayerInGame (player)) {
 				GameManager.InGamePlayers.Remove (player);
 			}
-
 		}
-
 	}
 }

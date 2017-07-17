@@ -14,20 +14,18 @@ namespace GunGame
 
 		public byte currentWeapon;
 
-		void Awake()
+		void Start()
 		{
-			bool isFirstTime;
+			data = SQLManager.LoadPlayer (Player.CSteamID.m_SteamID);
 
-			data = SQLManager.LoadPlayer (Player.CSteamID.m_SteamID, out isFirstTime);
-
-			ClearInv ();
-
-			if (isFirstTime) {
+			if (data.isFirstQuery) {
 				Player.GiveItem (GunGameConfig.instance.weapons.hat, 1);
 				Player.GiveItem (GunGameConfig.instance.weapons.mask, 1);
 				Player.GiveItem (GunGameConfig.instance.weapons.vest, 1);
 				Player.GiveItem (GunGameConfig.instance.weapons.pants, 1);
 				Player.GiveItem (GunGameConfig.instance.weapons.shirt, 1);
+			} else {
+				ClearInv ();
 			}
 		}
 
@@ -49,6 +47,7 @@ namespace GunGame
 		public void RespawnCallback()
 		{
 			GiveKit (currentWeapon);
+			Player.Teleport (GameManager.GetSpawnPositionRR (), 0);
 		}
 
 		public void KillCallback()
@@ -64,15 +63,10 @@ namespace GunGame
 
 		public void ClearInv()
 		{
-			foreach (Items i in Player.Inventory.items) {
-				for (byte x = 0; x < i.width; x++) {
-					for (byte y = 0; y < i.height; y++) {
-						byte index = (byte)((x * i.width) + y);
-
-						if (i.getItem (index) != null) {
-							i.removeItem (index);
-						}
-					}
+			for (byte p = 0; p <= 7; p++) {
+				byte amt = Player.Inventory.getItemCount (p);
+				for (byte index = 0; index < amt; index++) {
+					Player.Inventory.removeItem (p, 0);
 				}
 			}
 		}
