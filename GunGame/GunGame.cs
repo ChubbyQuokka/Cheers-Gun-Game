@@ -96,6 +96,10 @@ namespace GunGame
 			vectors.AddRange (instance.positions);
 			vectors.Add (new Vec3 (vector));
 
+			if (vectors.Contains (new Vec3 (new Vector3 (0, 0, 0)))) {
+				vectors.Remove (new Vec3 (new Vector3 (0, 0, 0)));
+			}
+
 			instance.positions = vectors.ToArray ();
 
 			SaveConfigFile ();
