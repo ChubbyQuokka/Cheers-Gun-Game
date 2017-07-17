@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Rocket.Unturned.Player;
 
 using UnityEngine;
+using SDG.Unturned;
 
 namespace GunGame.Managers
 {
@@ -82,6 +83,8 @@ namespace GunGame.Managers
 
 		public static void RequestBegin()
 		{
+			LightingManager.time = (uint)(LightingManager.cycle * LevelLighting.transition);
+
 			isRunning = true;
 			timer = GunGameConfig.instance.maxRoundTime;
 
