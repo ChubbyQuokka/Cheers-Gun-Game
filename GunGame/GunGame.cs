@@ -91,14 +91,15 @@ namespace GunGame
 
 		public static void RegisterSpawnPosition(Vector3 vector)
 		{
+
+			if (instance.positions [0].x == 0 && instance.positions [0].y == 0 && instance.positions [0].z == 0) {
+				instance.positions = new Vec3 [0];
+			}
+
 			List<Vec3> vectors = new List<Vec3> ();
 
 			vectors.AddRange (instance.positions);
 			vectors.Add (new Vec3 (vector));
-
-			if (vectors.Contains (new Vec3 (new Vector3 (0, 0, 0)))) {
-				vectors.Remove (new Vec3 (new Vector3 (0, 0, 0)));
-			}
 
 			instance.positions = vectors.ToArray ();
 
