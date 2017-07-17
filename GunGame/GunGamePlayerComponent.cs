@@ -64,6 +64,7 @@ namespace GunGame
 		public void KillCallback()
 		{
 			if (currentWeapon == GunGameConfig.instance.weapons.weapons.Length - 1) {
+				currentWeapon++;
 				GameManager.RequestFinish ();
 			} else {
 				ClearInv ();
