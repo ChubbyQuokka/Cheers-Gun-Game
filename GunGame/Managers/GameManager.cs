@@ -40,7 +40,10 @@ namespace GunGame.Managers
 			} else if (isRunning) {
 				if (timer <= 0) {
 					RequestFinish ();
+				} else {
+					timer--;
 				}
+
 			} else if (isWaiting) {
 				if (timer > 0) {
 
@@ -93,7 +96,7 @@ namespace GunGame.Managers
 			LightingManager.time = (uint)(LightingManager.cycle * LevelLighting.transition);
 
 			isRunning = true;
-			timer = GunGameConfig.instance.maxRoundTime;
+			timer = GunGameConfig.instance.maxRoundTime * 60;
 
 			foreach (ulong player in OnlinePlayers) {
 				InGamePlayers.Add (player);
