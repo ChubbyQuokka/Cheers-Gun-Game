@@ -26,7 +26,7 @@ namespace GunGame.Commands
 		public string Help
 		{
 			get {
-				return "Sets the \"Safezone\" spawn position to your current location.";
+				return "Sets the safezone to your current location.";
 			}
 		}
 

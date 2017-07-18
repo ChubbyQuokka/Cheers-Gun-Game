@@ -40,7 +40,7 @@ namespace GunGame.Commands
 		public List<string> Permissions
 		{
 			get {
-				return new List<string> { "gungame.safezone" };
+				return new List<string> { "gungame.spawn" };
 			}
 		}
 
@@ -55,7 +55,7 @@ namespace GunGame.Commands
 		{
 			UnturnedPlayer p = caller as UnturnedPlayer;
 			GunGameConfig.RegisterSpawnPosition (p.Position);
-			GunGame.Say (caller, "register_spawnposition", Color.green);
+			GunGame.Say (caller, "register_spawn", Color.green);
 		}
 	}
 }

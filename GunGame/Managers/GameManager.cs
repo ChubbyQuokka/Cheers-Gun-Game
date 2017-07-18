@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Rocket.Unturned.Player;
 
 using UnityEngine;
+
 using SDG.Unturned;
 
 namespace GunGame.Managers
@@ -80,9 +81,9 @@ namespace GunGame.Managers
 			UnturnedPlayer third = winners.ElementAt (2).GetPlayer ();
 			third.GunGamePlayer ().data.third++;
 
-			GunGame.Say ("first", Color.cyan, first.DisplayName);
-			GunGame.Say ("second", Color.cyan, second.DisplayName);
-			GunGame.Say ("third", Color.cyan, third.DisplayName);
+			GunGame.Say ("first", Color.cyan, first.DisplayName, first.GunGamePlayer ().kills, first.GunGamePlayer ().deaths);
+			GunGame.Say ("second", Color.cyan, second.DisplayName, second.GunGamePlayer ().kills, second.GunGamePlayer ().deaths);
+			GunGame.Say ("third", Color.cyan, third.DisplayName, third.GunGamePlayer ().kills, third.GunGamePlayer ().deaths);
 
 			InGamePlayers.Clear ();
 		}

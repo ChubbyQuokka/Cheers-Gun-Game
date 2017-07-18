@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-
-using Rocket.Unturned.Items;
+﻿using Rocket.Unturned.Items;
 using Rocket.Unturned.Player;
 
 using SDG.Unturned;
@@ -16,6 +13,9 @@ namespace GunGame
 		public SQLManager.PlayerQuery data;
 
 		public byte currentWeapon;
+
+		public byte kills;
+		public byte deaths;
 
 		void Start()
 		{
@@ -37,6 +37,19 @@ namespace GunGame
 			currentWeapon = 0;
 			GiveKit (currentWeapon);
 			data.rounds++;
+
+			kills = 0;
+			deaths = 0;
+		}
+
+		public void KickPlayer()
+		{
+			Invoke ("Kick", 5);
+		}
+
+		void Kick()
+		{
+			Player.Kick ("Please you leave your group before joining.");
 		}
 
 		public void DeathCallback(bool wasByKnife)
@@ -46,6 +59,7 @@ namespace GunGame
 			if (wasByKnife && currentWeapon != 0) {
 				currentWeapon--;
 			}
+			deaths++;
 		}
 
 		public void RespawnCallback()
@@ -71,6 +85,8 @@ namespace GunGame
 				currentWeapon++;
 				GiveKit (currentWeapon);
 			}
+
+			kills++;
 		}
 
 		public void ClearInv()

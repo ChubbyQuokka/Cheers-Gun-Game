@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -16,7 +17,6 @@ using Newtonsoft.Json.Converters;
 using SDG.Unturned;
 
 using GunGame.Managers;
-using System;
 
 namespace GunGame
 {
@@ -24,7 +24,7 @@ namespace GunGame
 	{
 		static GunGame instance;
 
-		const string SteamApiKey = "D57A6B0437CB735FFEE9317A9D42CCAA";
+		//const string SteamApiKey = "D57A6B0437CB735FFEE9317A9D42CCAA";
 
 		protected override void Load()
 		{
@@ -49,9 +49,9 @@ namespace GunGame
 
 		public static int GetTime()
 		{
-			float timer = (float)GameManager.timer;
+			float timer = GameManager.timer;
 
-			timer = timer / 60;
+			timer = timer / 60f;
 
 			return Mathf.RoundToInt (timer);
 		}
@@ -62,9 +62,9 @@ namespace GunGame
 				return new TranslationList
 				{
 					{"kill", "{0} [{1}] {2}"},
-					{"first", "{0} has placed first!"},
-					{"second", "{0} has placed second!"},
-					{"third", "{0} has placed third!"},
+					{"first", "{0} placed first with {1} kills and {2} deaths!"},
+					{"second", "{0} placed second with {1} kills and {2} deaths!"},
+					{"third", "{0} placed third with {1} kills and {2} deaths!"},
 					{"notenoughplayers", "The next match will start once {0} more players have joined."},
 					{"inprogress", "The game is currently in progress, it will end in {0} seconds."},
 					{"next", "Next round will start in {0} seconds!"},
@@ -96,13 +96,15 @@ namespace GunGame
 	public class GunGameConfig
 	{
 		public static GunGameConfig instance;
-		public static string Directory = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Config.json";
+		static string Directory = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Config.json";
 		static string DirectoryFail = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Config_errored.json";
 
 		public static void RegisterSpawnPosition(Vector3 vector)
 		{
 
+#pragma warning disable RECS0018 // Comparison of floating point numbers with equality operator
 			if (instance.positions [0].x == 0 && instance.positions [0].y == 0 && instance.positions [0].z == 0) {
+#pragma warning restore RECS0018 // Comparison of floating point numbers with equality operator
 				instance.positions = new Vec3 [0];
 			}
 
@@ -153,6 +155,8 @@ namespace GunGame
 			config.maxRoundTime = 36000;
 			config.minPlayers = 8;
 			config.broadcastKills = true;
+			config.maxSkills = true;
+			config.kickGroup = true;
 			config.mutePlayers = true;
 			config.positions = new Vec3 [] { new Vec3 (new Vector3 (0, 0, 0)) };
 			config.safezone = new Vec3 (new Vector3 (0, 0, 0));
@@ -182,8 +186,14 @@ namespace GunGame
 		[JsonProperty (PropertyName = "BroadcastKills")]
 		public bool broadcastKills;
 
+		[JsonProperty (PropertyName = "MaxSkills")]
+		public bool maxSkills;
+
 		[JsonProperty (PropertyName = "MutePlayers")]
 		public bool mutePlayers;
+
+		[JsonProperty (PropertyName = "KickGroupedPlayers")]
+		public bool kickGroup;
 
 		[JsonProperty (PropertyName = "Safezone")]
 		public Vec3 safezone;
