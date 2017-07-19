@@ -6,4 +6,4 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyProduct ("GunGame")]
 [assembly: AssemblyCopyright ("(c) 52 Piece Games 2017")]
 
-[assembly: AssemblyVersion ("1.1.0")]
+[assembly: AssemblyVersion ("1.1.1")]

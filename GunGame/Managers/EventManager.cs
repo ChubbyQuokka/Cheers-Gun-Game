@@ -51,11 +51,8 @@ namespace GunGame.Managers
 
 				GunGame.Say ("kill", Color.magenta, m.DisplayName, itemName, player.DisplayName);
 
-				player.GunGamePlayer ().data.deaths++;
-				m.GunGamePlayer ().data.kills++;
-
 				player.GunGamePlayer ().DeathCallback (cause == EDeathCause.MELEE || cause == EDeathCause.PUNCH);
-				m.GunGamePlayer ().KillCallback ();
+				m.GunGamePlayer ().KillCallback (cause == EDeathCause.MELEE || cause == EDeathCause.PUNCH);
 
 			}
 		}

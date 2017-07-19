@@ -44,7 +44,7 @@ namespace GunGame
 
 		public void KickPlayer()
 		{
-			Invoke ("Kick", 5);
+			Invoke ("Kick", 3);
 		}
 
 		void Kick()
@@ -59,6 +59,7 @@ namespace GunGame
 			if (wasByKnife && currentWeapon != 0) {
 				currentWeapon--;
 			}
+			data.deaths++;
 			deaths++;
 		}
 
@@ -75,17 +76,19 @@ namespace GunGame
 			Player.Teleport (GameManager.GetSpawnPositionRR (), 0);
 		}
 
-		public void KillCallback()
+		public void KillCallback(bool wasWithKnife)
 		{
-			if (currentWeapon == GunGameConfig.instance.weapons.weapons.Length - 1) {
-				currentWeapon++;
-				GameManager.RequestFinish ();
-			} else {
-				ClearInv ();
-				currentWeapon++;
-				GiveKit (currentWeapon);
+			if (wasWithKnife) {
+				if (currentWeapon == GunGameConfig.instance.weapons.weapons.Length - 1) {
+					currentWeapon++;
+					GameManager.RequestFinish ();
+				} else {
+					ClearInv ();
+					currentWeapon++;
+					GiveKit (currentWeapon);
+				}
 			}
-
+			data.kills++;
 			kills++;
 		}
 
@@ -110,7 +113,7 @@ namespace GunGame
 			Player.Inventory.items [2].tryAddItem (mag);
 			Player.Inventory.items [2].tryAddItem (mag);
 
-			Player.Player.equipment.tellAskEquip (Player.CSteamID, 0, 0, 0);
+			Player.Player.equipment.tryEquip (0, 0, 0);
 		}
 	}
 }
