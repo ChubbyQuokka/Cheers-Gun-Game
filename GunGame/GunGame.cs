@@ -152,7 +152,7 @@ namespace GunGame
 		{
 			GunGameConfig config = new GunGameConfig ();
 
-			config.maxRoundTime = 36000;
+			config.maxRoundTime = 600;
 			config.minPlayers = 8;
 			config.broadcastKills = true;
 			config.maxSkills = true;
