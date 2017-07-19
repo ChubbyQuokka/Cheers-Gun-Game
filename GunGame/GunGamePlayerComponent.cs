@@ -78,7 +78,7 @@ namespace GunGame
 
 		public void KillCallback(bool wasWithKnife)
 		{
-			if (wasWithKnife) {
+			if (!wasWithKnife) {
 				if (currentWeapon == GunGameConfig.instance.weapons.weapons.Length - 1) {
 					currentWeapon++;
 					GameManager.RequestFinish ();
