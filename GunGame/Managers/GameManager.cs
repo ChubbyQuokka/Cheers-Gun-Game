@@ -40,8 +40,6 @@ namespace GunGame.Managers
 			} else if (isRunning) {
 				if (timer <= 0) {
 					RequestFinish ();
-				} else {
-					timer--;
 				}
 
 			} else if (isWaiting) {
