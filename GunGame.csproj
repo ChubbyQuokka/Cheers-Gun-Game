@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
@@ -20,6 +20,12 @@
     <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="I18N">
+      <HintPath>lib\I18N.dll</HintPath>
+    </Reference>
+    <Reference Include="I18N.West">
+      <HintPath>lib\I18N.West.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="Assembly-CSharp">
       <HintPath>lib\Assembly-CSharp.dll</HintPath>
@@ -66,12 +72,7 @@
     <Compile Include="GunGame\API\IGunGameCommand.cs" />
     <Compile Include="GunGame\Commands\Commands.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="GunGame\" />
-    <Folder Include="GunGame\Commands\" />
-    <Folder Include="GunGame\Managers\" />
-    <Folder Include="GunGame\API\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
