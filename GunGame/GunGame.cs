@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Reflection;
 
 using UnityEngine;
 
@@ -50,21 +51,32 @@ namespace GunGame
 
                 EventManager.Register();
 
+                RocketLogger.Log(string.Format("Welcome to Gun Game v{0}!", Assembly.GetName().Version.ToString()), ConsoleColor.Yellow);
+
+#pragma warning disable RECS0018
+                if (GunGameConfig.instance.positions[0].x == 0 && GunGameConfig.instance.positions[0].y == 0 && GunGameConfig.instance.positions[0].z == 0)
+                    RocketLogger.Log("NOTE: You have not set the spawn positions yet!", ConsoleColor.Yellow);
+
+                if (GunGameConfig.instance.safezone.x == 0 && GunGameConfig.instance.safezone.y == 0 && GunGameConfig.instance.safezone.z == 0)
+                    RocketLogger.Log("NOTE: You have not set the lobby yet!", ConsoleColor.Yellow);
+
+
                 isLoaded = true;
             }
         }
 
         protected override void Unload()
         {
-            RocketLogger.LogError("Reloading plugin is unsupported! Plugin will not load until server is restarted.");
+            if (!wasUnloaded)
+                RocketLogger.LogError("Reloading plugin is unsupported! Plugin will not load until server is restarted.");
 
             EventManager.Unregister();
 
             foreach (ulong player in GameManager.OnlinePlayers)
                 SQLManager.SavePlayer(player, player.GetPlayer().GunGamePlayer().data);
 
-            isLoaded = false;
             wasUnloaded = true;
+            isLoaded = false;
         }
 
         void FixedUpdate()
@@ -131,13 +143,11 @@ namespace GunGame
         static string Directory = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Config.json";
         static string DirectoryFail = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Config_errored.json";
 
-#pragma warning disable RECS0018
         public static void RegisterSpawnPosition(Vector3 vector)
         {
-            if (instance.positions[0].x == 0 && instance.positions[0].y == 0 && instance.positions[0].z == 0) {
+            if (instance.positions[0].x == 0 && instance.positions[0].y == 0 && instance.positions[0].z == 0) 
                 instance.positions = new Vec3[0];
-            }
-
+            
             List<Vec3> vectors = new List<Vec3>();
 
             vectors.AddRange(instance.positions);
