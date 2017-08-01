@@ -16,6 +16,9 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="Assembly-CSharp">
@@ -59,21 +62,25 @@
     <Compile Include="GunGame\Managers\GameManager.cs" />
     <Compile Include="GunGame\Managers\EventManager.cs" />
     <Compile Include="GunGame\Managers\SQLManager.cs" />
-    <Compile Include="GunGame\Commands\CommandSafezone.cs" />
-    <Compile Include="GunGame\Commands\CommandSpawnpoint.cs" />
-    <Compile Include="GunGame\Commands\CommandStatus.cs" />
+    <Compile Include="GunGame\Managers\CommandManager.cs" />
+    <Compile Include="GunGame\API\IGunGameCommand.cs" />
+    <Compile Include="GunGame\Commands\Commands.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="GunGame\" />
     <Folder Include="GunGame\Commands\" />
     <Folder Include="GunGame\Managers\" />
+    <Folder Include="GunGame\API\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
       <Properties>
         <Policies>
-          <DotNetNamingPolicy DirectoryNamespaceAssociation="Hierarchical" ResourceNamePolicy="MSBuild" />
+          <DotNetNamingPolicy DirectoryNamespaceAssociation="Hierarchical" ResourceNamePolicy="MSBuild">
+            <inheritsSet />
+            <inheritsScope />
+          </DotNetNamingPolicy>
         </Policies>
       </Properties>
     </MonoDevelop>
