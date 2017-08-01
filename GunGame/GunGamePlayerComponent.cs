@@ -61,7 +61,7 @@ namespace GunGame
 
         public void Kick()
         {
-            Invoke("_Kick", 3);
+            Invoke("_Kick", 1);
         }
 
         void _Kick()
@@ -122,8 +122,16 @@ namespace GunGame
             }
         }
 
-        void GiveKit(byte kit)
+        byte kitRequest;
+        public void GiveKit(byte kit)
         {
+            kitRequest = kit;
+            Invoke("_GiveKit", 0.05f);
+        }
+
+        void _GiveKit()
+        {
+            byte kit = kitRequest;
             Item primary = GunGameConfig.instance.weapons.weapons[kit].GetUnturnedItem();
             Item secondary = UnturnedItems.AssembleItem(GunGameConfig.instance.weapons.secondary, 1, 100, null);
             Item mag = UnturnedItems.AssembleItem(GunGameConfig.instance.weapons.weapons[kit].mag, GunGameConfig.instance.weapons.weapons[kit].ammo, 100, null);

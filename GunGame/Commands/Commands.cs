@@ -1,4 +1,5 @@
-﻿using GunGame.API;
+﻿using System;
+using GunGame.API;
 using GunGame.API.Exceptions;
 using GunGame.Managers;
 
@@ -125,6 +126,25 @@ namespace GunGame.Commands
                     GunGame.Say(caller, "invalid_perms_help", Color.red);
             else
                 GunGame.Say(caller, "invalid_cmd_help", Color.red);
+        }
+    }
+
+    public class CommandGiveKit : IGunGameCommand
+    {
+        public string Help => "Gives you the specified kit.";
+        public EPermissionLevel PermissionLevel => EPermissionLevel.HIGH;
+        public ECommandTiming CommandTiming => ECommandTiming.RUNNING;
+        public void Execute(IRocketPlayer caller, string[] args)
+        {
+            if (args.Length != 1 || !byte.TryParse(args[0], out byte kit) || kit >= GunGameConfig.instance.weapons.weapons.Length)
+                throw new GunGameException(EExceptionType.INVALID_ARGS);
+            
+            GunGamePlayerComponent p = ((UnturnedPlayer)caller).GunGamePlayer();
+
+            p.ClearItems();
+            p.GiveKit(kit);
+            p.currentWeapon = kit;
+            GunGame.Say(caller, "kit", Color.green, kit);
         }
     }
 }

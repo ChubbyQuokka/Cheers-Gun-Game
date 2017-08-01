@@ -28,6 +28,7 @@ namespace GunGame.Managers
             RegisterCommand("forcestart", new CommandForceStart());
             RegisterCommand("forcestop", new CommandForceStop());
             RegisterCommand("help", new CommandHelp());
+            RegisterCommand("kit", new CommandGiveKit());
         }
 
         public static void ExcecuteCommand(IRocketPlayer player, string[] args)

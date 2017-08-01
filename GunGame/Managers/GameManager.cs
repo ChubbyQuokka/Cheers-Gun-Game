@@ -82,15 +82,20 @@ namespace GunGame.Managers
 
             UnturnedPlayer first = winners.ElementAt(0).GetPlayer();
             first.GunGamePlayer().data.first++;
-            UnturnedPlayer second = winners.ElementAt(1).GetPlayer();
-            second.GunGamePlayer().data.second++;
-            UnturnedPlayer third = winners.ElementAt(2).GetPlayer();
-            third.GunGamePlayer().data.third++;
-
             GunGame.Say("first", Color.cyan, first.DisplayName, first.GunGamePlayer().kills, first.GunGamePlayer().deaths);
-            GunGame.Say("second", Color.cyan, second.DisplayName, second.GunGamePlayer().kills, second.GunGamePlayer().deaths);
-            GunGame.Say("third", Color.cyan, third.DisplayName, third.GunGamePlayer().kills, third.GunGamePlayer().deaths);
 
+            if (InGamePlayers.Count > 1) {
+                UnturnedPlayer second = winners.ElementAt(1).GetPlayer();
+                second.GunGamePlayer().data.second++;
+                GunGame.Say("second", Color.cyan, second.DisplayName, second.GunGamePlayer().kills, second.GunGamePlayer().deaths);
+            }
+
+            if (InGamePlayers.Count > 2) {
+                UnturnedPlayer third = winners.ElementAt(2).GetPlayer();
+                third.GunGamePlayer().data.third++;
+                GunGame.Say("third", Color.cyan, third.DisplayName, third.GunGamePlayer().kills, third.GunGamePlayer().deaths);
+            }
+            
             InGamePlayers.Clear();
         }
 
@@ -106,6 +111,11 @@ namespace GunGame.Managers
                 player.GetPlayer().Teleport(GetSpawnPositionRR(), 0);
                 player.GetPlayer().GunGamePlayer().EnterGame();
             }
+
+            Rocket.Core.Logging.Logger.Log(String.Format("The game has started with {0} players!", InGamePlayers.Count), ConsoleColor.Yellow);
+
+            if (InGamePlayers.Count < 3)
+                Rocket.Core.Logging.Logger.Log("Starting game with less then 3 players can cause bugs!", ConsoleColor.Yellow);
         }
 
         public static bool IsPlayerInGame(ulong player)

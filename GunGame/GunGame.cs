@@ -52,6 +52,7 @@ namespace GunGame
                 EventManager.Register();
 
                 RocketLogger.Log(string.Format("Welcome to Gun Game v{0}!", Assembly.GetName().Version.ToString()), ConsoleColor.Yellow);
+                RocketLogger.Log("To start the timer, use /gg start!", ConsoleColor.Yellow);
 
 #pragma warning disable RECS0018
                 if (GunGameConfig.instance.positions[0].x == 0 && GunGameConfig.instance.positions[0].y == 0 && GunGameConfig.instance.positions[0].z == 0)
@@ -59,7 +60,6 @@ namespace GunGame
 
                 if (GunGameConfig.instance.safezone.x == 0 && GunGameConfig.instance.safezone.y == 0 && GunGameConfig.instance.safezone.z == 0)
                     RocketLogger.Log("NOTE: You have not set the lobby yet!", ConsoleColor.Yellow);
-
 
                 isLoaded = true;
             }
@@ -115,7 +115,8 @@ namespace GunGame
                     {"invalid_stop", "The timer is already paused!"},
                     {"help", "{0} : {1}"},
                     {"invalid_cmd_help", "We couldn't find any info on your requested command!"},
-                    {"invalid_perms_help", "You don't have permission to view info on your requested command!"}
+                    {"invalid_perms_help", "You don't have permission to view info on your requested command!"},
+                    {"kit", "You have been givin kit {0}!"}
                 };
             }
         }
