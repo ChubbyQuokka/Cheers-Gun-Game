@@ -144,8 +144,10 @@ namespace GunGame
                         if (e.timing.HasFlags(ECommandTiming.STOPPED)) {
                             if (hasMultiple)
                                 str += " or Stopped";
-                            else
+                            else {
                                 str += "Stopped";
+                                hasMultiple = true;
+                            }
                         }
                         if (e.timing.HasFlags(ECommandTiming.WAITING)) {
                             if (hasMultiple)

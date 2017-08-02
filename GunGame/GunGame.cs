@@ -106,7 +106,7 @@ namespace GunGame
                     {"invalid_args", "You have specified an invalid argument!"},
                     {"invalid_cmd", "You have specified an invalid command!"},
                     {"invalid_time", "This command can only be called when the game is {0}!"},
-                    {"forcestop", "You have forced the game to stop! 'Use /gg start' to resume the timer."},
+                    {"forcestop", "You have forced the game to stop! Use '/gg start' to resume the timer."},
                     {"forcestart", "You have forced the game to start!"},
                     {"start", "You have resumed the timer."},
                     {"stop", "You have paused the timer."},
