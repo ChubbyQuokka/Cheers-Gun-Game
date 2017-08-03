@@ -71,13 +71,14 @@ namespace GunGame
 
         public void DeathCallback(bool wasByKnife)
         {
+            data.deaths++;
+            deaths++;
+
             ClearItems();
 
             if (wasByKnife && currentWeapon != 0) {
                 currentWeapon--;
             }
-            data.deaths++;
-            deaths++;
         }
 
         public void RespawnCallback()
@@ -98,6 +99,9 @@ namespace GunGame
 
         public void KillCallback(bool wasWithKnife)
         {
+            data.kills++;
+            kills++;
+
             if (!wasWithKnife) {
                 if (currentWeapon == GunGameConfig.instance.weapons.weapons.Length - 1) {
                     currentWeapon++;
@@ -108,8 +112,6 @@ namespace GunGame
                     GiveKit(currentWeapon);
                 }
             }
-            data.kills++;
-            kills++;
         }
 
         public void ClearItems()
