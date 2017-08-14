@@ -33,7 +33,6 @@ namespace GunGame.Managers
             MySqlCommand cmd = Connection.CreateCommand();
 
             cmd.CommandText = string.Format("SELECT `kills`,`deaths`,`rounds`,`first`,`second`,`third` FROM `gungame` WHERE `steamid`='{0}'", steamId);
-
             Connection.Open();
             MySqlDataReader dr = cmd.ExecuteReader();
 

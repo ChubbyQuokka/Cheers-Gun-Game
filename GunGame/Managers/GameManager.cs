@@ -23,7 +23,7 @@ namespace GunGame.Managers
 
         public static void Initialize()
         {
-            isStopped = true;
+            isStopped = false;
 
             OnlinePlayers = new List<ulong>();
             InGamePlayers = new List<ulong>();
@@ -74,6 +74,7 @@ namespace GunGame.Managers
             foreach (ulong player in InGamePlayers) {
                 player.GetPlayer().GunGamePlayer().ClearItems();
                 player.GetPlayer().Teleport(GunGameConfig.instance.safezone.Vector3, 0);
+                player.GetPlayer().Heal(100);
             }
 
             IEnumerable<ulong> winners = from player in InGamePlayers

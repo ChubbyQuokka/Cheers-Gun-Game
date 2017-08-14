@@ -61,7 +61,7 @@ namespace GunGame
 
         public void Kick()
         {
-            Invoke("_Kick", 1);
+            Invoke("_Kick", 3);
         }
 
         void _Kick()
@@ -94,7 +94,8 @@ namespace GunGame
 
         void TeleportAfterRespawn()
         {
-            Player.Teleport(GameManager.GetSpawnPositionRR(), 0);
+            if (GameManager.isRunning)
+                Player.Teleport(GameManager.GetSpawnPositionRR(), 0);
         }
 
         public void KillCallback(bool wasWithKnife)

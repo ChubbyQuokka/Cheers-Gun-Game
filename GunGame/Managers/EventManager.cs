@@ -9,11 +9,13 @@ using SDG.Unturned;
 using Steamworks;
 
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace GunGame.Managers
 {
     public static class EventManager
     {
+        
         public static void Register()
         {
             UnturnedPlayerEvents.OnPlayerDeath += OnPlayerDeath;
@@ -66,12 +68,15 @@ namespace GunGame.Managers
                 }
                 player.GunGamePlayer().DeathCallback(isMelee || isPunch);
                 m.GunGamePlayer().KillCallback(isMelee || isPunch);
-            }
+            } else 
+                player.GunGamePlayer().ClearItems();
+            
         }
 
         static void OnPlayerRevive(UnturnedPlayer player, Vector3 pos, byte angle)
         {
-            player.GunGamePlayer().RespawnCallback();
+            if (GameManager.IsPlayerInGame(player.CSteamID.m_SteamID)) 
+                player.GunGamePlayer().RespawnCallback();
         }
 
         static void OnPlayerChatted(UnturnedPlayer player, ref Color color, string message, EChatMode mode, ref bool cancel)
