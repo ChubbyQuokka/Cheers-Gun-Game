@@ -51,6 +51,12 @@
       <HintPath>lib\Rocket.Unturned.dll</HintPath>
       <Private>False</Private>
     </Reference>
+	<Reference Include="System.Management">
+	  <HintPath>lib\System.Management.dll</HintPath>
+	</Reference>
+	<Reference Include="System.Transactions">
+	  <HintPath>lib\System.Transactions.dll</HintPath>
+	</Reference>
     <Reference Include="UnityEngine">
       <HintPath>lib\UnityEngine.dll</HintPath>
       <Private>False</Private>
