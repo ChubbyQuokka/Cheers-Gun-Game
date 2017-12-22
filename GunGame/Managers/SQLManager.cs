@@ -1,4 +1,6 @@
-﻿using MySql.Data.MySqlClient;
+﻿using System;
+using MySql.Data.MySqlClient;
+using Rocket.Core.Logging;
 
 namespace GunGame.Managers
 {
@@ -6,24 +8,34 @@ namespace GunGame.Managers
     {
         public static MySqlConnection Connection;
 
-        public static void Initialize()
+        public static bool Initialize()
         {
-            Connection = new MySqlConnection(string.Format("SERVER={0};DATABASE={1};UID={2};PASSWORD={3};PORT={4};", GunGameConfig.instance.sqlSettings.address, GunGameConfig.instance.sqlSettings.database, GunGameConfig.instance.sqlSettings.user, GunGameConfig.instance.sqlSettings.pass, GunGameConfig.instance.sqlSettings.port));
+            try
+            {
+                Connection = new MySqlConnection(string.Format("SERVER={0};DATABASE={1};UID={2};PASSWORD={3};PORT={4};", GunGameConfig.instance.sqlSettings.address, GunGameConfig.instance.sqlSettings.database, GunGameConfig.instance.sqlSettings.user, GunGameConfig.instance.sqlSettings.pass, GunGameConfig.instance.sqlSettings.port));
 
-            MySqlCommand cmd = Connection.CreateCommand();
+                MySqlCommand cmd = Connection.CreateCommand();
 
-            cmd.CommandText = "show tables like 'gungame'";
+                cmd.CommandText = "show tables like 'gungame'";
 
-            Connection.Open();
+                Connection.Open();
 
-            if (cmd.ExecuteScalar() == null) {
-                MySqlCommand cmd2 = Connection.CreateCommand();
-                cmd2.CommandText = "CREATE TABLE `gungame` (`steamid` bigint NOT NULL UNIQUE,`kills` integer NOT NULL,`deaths` integer NOT NULL,`rounds` integer NOT NULL,`first` integer NOT NULL,`second` integer NOT NULL,`third` integer NOT NULL, PRIMARY KEY (`steamid`))";
-                cmd2.ExecuteNonQuery();
+                if (cmd.ExecuteScalar() == null)
+                {
+                    MySqlCommand cmd2 = Connection.CreateCommand();
+                    cmd2.CommandText = "CREATE TABLE `gungame` (`steamid` bigint NOT NULL UNIQUE,`kills` integer NOT NULL,`deaths` integer NOT NULL,`rounds` integer NOT NULL,`first` integer NOT NULL,`second` integer NOT NULL,`third` integer NOT NULL, PRIMARY KEY (`steamid`))";
+                    cmd2.ExecuteNonQuery();
+                }
+
+                Connection.Close();
+                return true;
             }
-
-            Connection.Close();
-
+            catch (Exception e)
+            {
+                Logger.Log("MySQL Initialization failed! Proceding without MySQL support...");
+                Logger.Log(e);
+                return false;
+            }
         }
 
         public static PlayerQuery LoadPlayer(ulong steamId)
@@ -36,7 +48,8 @@ namespace GunGame.Managers
             Connection.Open();
             MySqlDataReader dr = cmd.ExecuteReader();
 
-            if (dr.Read()) {
+            if (dr.Read())
+            {
                 query.kills = (int)dr[0];
                 query.deaths = (int)dr[1];
                 query.rounds = (int)dr[2];
@@ -44,7 +57,9 @@ namespace GunGame.Managers
                 query.second = (int)dr[4];
                 query.third = (int)dr[5];
                 query.isFirstQuery = false;
-            } else {
+            }
+            else
+            {
                 query.kills = 0;
                 query.deaths = 0;
                 query.rounds = 0;
@@ -63,9 +78,12 @@ namespace GunGame.Managers
         {
             MySqlCommand cmd = Connection.CreateCommand();
 
-            if (query.isFirstQuery) {
+            if (query.isFirstQuery)
+            {
                 cmd.CommandText = string.Format("INSERT INTO `gungame` VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}')", steamId, query.kills, query.deaths, query.rounds, query.first, query.second, query.third);
-            } else {
+            }
+            else
+            {
                 cmd.CommandText = string.Format("UPDATE `gungame` SET `kills`='{0}', `deaths`='{1}', `rounds`='{2}', `first`='{3}', `second`='{4}', `third`='{5}' WHERE `steamid`='{6}'", query.kills, query.deaths, query.rounds, query.first, query.second, query.third, steamId);
             }
 

@@ -34,6 +34,8 @@ namespace GunGame
         static bool isLoaded;
         static bool wasUnloaded;
 
+        public static bool IsMySqlEnabled = true;
+
         //This is for a future update :D
         //const string SteamApiKey = "D57A6B0437CB735FFEE9317A9D42CCAA";
 
@@ -41,18 +43,23 @@ namespace GunGame
         {
             if (wasUnloaded)
                 UnloadPlugin();
-            else {
+            else
+            {
                 instance = this;
 
                 GunGameConfig.Initialize();
                 GameManager.Initialize();
-                SQLManager.Initialize();
                 CommandManager.Initialize();
+
+                if (!SQLManager.Initialize())
+                {
+                    GunGamePlayerConfig.Initialize();
+                }
 
                 EventManager.Register();
 
                 RocketLogger.Log(string.Format("Welcome to Gun Game v{0}!", Assembly.GetName().Version.ToString()), ConsoleColor.Yellow);
-                RocketLogger.Log("To start the timer, use /gg start!", ConsoleColor.Yellow);
+                //RocketLogger.Log("To start the timer, use /gg start!", ConsoleColor.Yellow);
 
 #pragma warning disable RECS0018
                 if (GunGameConfig.instance.positions[0].x == 0 && GunGameConfig.instance.positions[0].y == 0 && GunGameConfig.instance.positions[0].z == 0)
@@ -72,8 +79,9 @@ namespace GunGame
 
             EventManager.Unregister();
 
-            foreach (ulong player in GameManager.OnlinePlayers)
-                SQLManager.SavePlayer(player, player.GetPlayer().GunGamePlayer().data);
+            if (IsMySqlEnabled)
+                foreach (ulong player in GameManager.OnlinePlayers)
+                    SQLManager.SavePlayer(player, player.GetPlayer().GunGamePlayer().data);
 
             wasUnloaded = true;
             isLoaded = false;
@@ -137,6 +145,54 @@ namespace GunGame
         }
     }
 
+    public class GunGamePlayerConfig
+    {
+        static GunGamePlayerConfig instance;
+
+        public List<ulong> JoinedPlayers;
+
+        static string Directory = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Players.json";
+
+        public static void Initialize()
+        {
+            if (File.Exists(Directory))
+            {
+                string p = File.ReadAllText(Directory);
+
+                try
+                {
+                    instance = JsonConvert.DeserializeObject<GunGamePlayerConfig>(p);
+                }
+                catch
+                {
+                    instance = new GunGamePlayerConfig();
+                    instance.JoinedPlayers = new List<ulong>();
+                }
+            }
+        }
+
+        public static void Save()
+        {
+            string file = JsonConvert.SerializeObject(instance);
+
+            File.WriteAllText(Directory, file);
+        }
+
+        public static void AddPlayer(ulong p)
+        {
+            if (!Contains(p))
+            {
+                instance.JoinedPlayers.Add(p);
+                Save();
+            }
+        }
+
+        public static bool Contains(ulong p)
+        {
+            return instance.JoinedPlayers.Contains(p);
+        }
+    }
+
     [JsonObject(MemberSerialization.OptIn)]
     public class GunGameConfig
     {
@@ -146,9 +202,9 @@ namespace GunGame
 
         public static void RegisterSpawnPosition(Vector3 vector)
         {
-            if (instance.positions[0].x == 0 && instance.positions[0].y == 0 && instance.positions[0].z == 0) 
+            if (instance.positions[0].x == 0 && instance.positions[0].y == 0 && instance.positions[0].z == 0)
                 instance.positions = new Vec3[0];
-            
+
             List<Vec3> vectors = new List<Vec3>();
 
             vectors.AddRange(instance.positions);
@@ -169,20 +225,26 @@ namespace GunGame
 
         public static void Initialize()
         {
-            if (File.Exists(Directory)) {
+            if (File.Exists(Directory))
+            {
 
                 string file = File.ReadAllText(Directory);
 
-                try {
+                try
+                {
                     instance = JsonConvert.DeserializeObject<GunGameConfig>(file);
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     RocketLogger.LogException(e, null);
                     RocketLogger.LogWarning("Config failed to load, reverting to default settings...");
                     File.WriteAllText(DirectoryFail, file);
                     LoadDefaultConfig();
                     SaveConfigFile();
                 }
-            } else {
+            }
+            else
+            {
                 LoadDefaultConfig();
                 SaveConfigFile();
             }

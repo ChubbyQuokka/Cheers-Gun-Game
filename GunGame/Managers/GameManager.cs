@@ -44,23 +44,30 @@ namespace GunGame.Managers
 
         public static void Update()
         {
-            if (isRunning) {
+            if (isRunning)
+            {
                 if (timer <= 0)
                     RequestFinish();
                 else
                     timer--;
 
-            } else if (!isStopped) {
-                if (OnlinePlayers.Count >= GunGameConfig.instance.minPlayers) {
-                    if (timer > 0) {
+            }
+            else if (!isStopped)
+            {
+                if (OnlinePlayers.Count >= GunGameConfig.instance.minPlayers)
+                {
+                    if (timer > 0)
+                    {
                         if (timer == 300)
                             GunGame.Say("next", Color.green, "5");
                         else if (timer == 1800)
                             GunGame.Say("next", Color.green, "30");
                         timer--;
-                    } else
+                    }
+                    else
                         RequestBegin();
-                } else
+                }
+                else
                     timer = 1800;
             }
         }
@@ -71,7 +78,8 @@ namespace GunGame.Managers
 
             timer = 1800;
 
-            foreach (ulong player in InGamePlayers) {
+            foreach (ulong player in InGamePlayers)
+            {
                 player.GetPlayer().GunGamePlayer().ClearItems();
                 player.GetPlayer().Teleport(GunGameConfig.instance.safezone.Vector3, 0);
                 player.GetPlayer().Heal(100);
@@ -82,21 +90,32 @@ namespace GunGame.Managers
                                          select player;
 
             UnturnedPlayer first = winners.ElementAt(0).GetPlayer();
-            first.GunGamePlayer().data.first++;
+
+            if (GunGame.IsMySqlEnabled)
+                first.GunGamePlayer().data.first++;
+
             GunGame.Say("first", Color.cyan, first.DisplayName, first.GunGamePlayer().kills, first.GunGamePlayer().deaths);
 
-            if (InGamePlayers.Count > 1) {
+            if (InGamePlayers.Count > 1)
+            {
                 UnturnedPlayer second = winners.ElementAt(1).GetPlayer();
-                second.GunGamePlayer().data.second++;
+
+                if (GunGame.IsMySqlEnabled)
+                    second.GunGamePlayer().data.second++;
+
                 GunGame.Say("second", Color.cyan, second.DisplayName, second.GunGamePlayer().kills, second.GunGamePlayer().deaths);
             }
 
-            if (InGamePlayers.Count > 2) {
+            if (InGamePlayers.Count > 2)
+            {
                 UnturnedPlayer third = winners.ElementAt(2).GetPlayer();
-                third.GunGamePlayer().data.third++;
+
+                if (GunGame.IsMySqlEnabled)
+                    third.GunGamePlayer().data.third++;
+
                 GunGame.Say("third", Color.cyan, third.DisplayName, third.GunGamePlayer().kills, third.GunGamePlayer().deaths);
             }
-            
+
             InGamePlayers.Clear();
         }
 
@@ -107,7 +126,8 @@ namespace GunGame.Managers
             isRunning = true;
             timer = GunGameConfig.instance.maxRoundTime * 60;
 
-            foreach (ulong player in OnlinePlayers) {
+            foreach (ulong player in OnlinePlayers)
+            {
                 InGamePlayers.Add(player);
                 player.GetPlayer().Teleport(GetSpawnPositionRR(), 0);
                 player.GetPlayer().GunGamePlayer().EnterGame();

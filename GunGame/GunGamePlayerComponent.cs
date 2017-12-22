@@ -26,26 +26,63 @@ namespace GunGame
 
         void Start()
         {
-            data = SQLManager.LoadPlayer(Player.CSteamID.m_SteamID);
+            bool isFirst = false;
 
-            if (R.Permissions.HasPermission(Player, new List<string> { "gungame.high" })) {
+            if (GunGame.IsMySqlEnabled)
+            {
+                data = SQLManager.LoadPlayer(Player.CSteamID.m_SteamID);
+            }
+            else
+            {
+                isFirst = !GunGamePlayerConfig.Contains(Player.CSteamID.m_SteamID);
+            }
+
+            if (R.Permissions.HasPermission(Player, new List<string> { "gungame.high" }))
+            {
                 pLevel = EPermissionLevel.HIGH;
-            } else if (R.Permissions.HasPermission(Player, new List<string> { "gungame.medium" })) {
+            }
+            else if (R.Permissions.HasPermission(Player, new List<string> { "gungame.medium" }))
+            {
                 pLevel = EPermissionLevel.MEDIUM;
-            } else if (R.Permissions.HasPermission(Player, new List<string> { "gungame.low" })) {
+            }
+            else if (R.Permissions.HasPermission(Player, new List<string> { "gungame.low" }))
+            {
                 pLevel = EPermissionLevel.LOW;
-            } else {
+            }
+            else
+            {
                 pLevel = EPermissionLevel.NONE;
             }
 
-            if (data.isFirstQuery) {
-                Player.GiveItem(GunGameConfig.instance.weapons.hat, 1);
-                Player.GiveItem(GunGameConfig.instance.weapons.mask, 1);
-                Player.GiveItem(GunGameConfig.instance.weapons.vest, 1);
-                Player.GiveItem(GunGameConfig.instance.weapons.pants, 1);
-                Player.GiveItem(GunGameConfig.instance.weapons.shirt, 1);
-            } else {
-                ClearItems();
+            if (GunGame.IsMySqlEnabled)
+            {
+                if (data.isFirstQuery)
+                {
+                    Player.GiveItem(GunGameConfig.instance.weapons.hat, 1);
+                    Player.GiveItem(GunGameConfig.instance.weapons.mask, 1);
+                    Player.GiveItem(GunGameConfig.instance.weapons.vest, 1);
+                    Player.GiveItem(GunGameConfig.instance.weapons.pants, 1);
+                    Player.GiveItem(GunGameConfig.instance.weapons.shirt, 1);
+                }
+                else
+                {
+                    ClearItems();
+                }
+            }
+            else
+            {
+                if (isFirst)
+                {
+                    Player.GiveItem(GunGameConfig.instance.weapons.hat, 1);
+                    Player.GiveItem(GunGameConfig.instance.weapons.mask, 1);
+                    Player.GiveItem(GunGameConfig.instance.weapons.vest, 1);
+                    Player.GiveItem(GunGameConfig.instance.weapons.pants, 1);
+                    Player.GiveItem(GunGameConfig.instance.weapons.shirt, 1);
+                }
+                else
+                {
+                    ClearItems();
+                }
             }
         }
 
@@ -53,7 +90,9 @@ namespace GunGame
         {
             currentWeapon = 0;
             GiveKit(currentWeapon);
-            data.rounds++;
+
+            if (GunGame.IsMySqlEnabled)
+                data.rounds++;
 
             kills = 0;
             deaths = 0;
@@ -71,12 +110,15 @@ namespace GunGame
 
         public void DeathCallback(bool wasByKnife)
         {
-            data.deaths++;
+            if (GunGame.IsMySqlEnabled)
+                data.deaths++;
+
             deaths++;
 
             ClearItems();
 
-            if (wasByKnife && currentWeapon != 0) {
+            if (wasByKnife && currentWeapon != 0)
+            {
                 currentWeapon--;
             }
         }
@@ -86,7 +128,8 @@ namespace GunGame
             if (GunGameConfig.instance.maxSkills)
                 Player.GunGamePlayer().MaxSkills();
 
-            if (GameManager.isRunning) {
+            if (GameManager.isRunning)
+            {
                 GiveKit(currentWeapon);
                 Invoke("TeleportAfterRespawn", 3);
             }
@@ -100,14 +143,20 @@ namespace GunGame
 
         public void KillCallback(bool wasWithKnife)
         {
-            data.kills++;
+            if (GunGame.IsMySqlEnabled)
+                data.kills++;
+
             kills++;
 
-            if (!wasWithKnife) {
-                if (currentWeapon == GunGameConfig.instance.weapons.weapons.Length - 1) {
+            if (!wasWithKnife)
+            {
+                if (currentWeapon == GunGameConfig.instance.weapons.weapons.Length - 1)
+                {
                     currentWeapon++;
                     GameManager.RequestFinish();
-                } else {
+                }
+                else
+                {
                     ClearItems();
                     currentWeapon++;
                     GiveKit(currentWeapon);
@@ -117,9 +166,11 @@ namespace GunGame
 
         public void ClearItems()
         {
-            for (byte p = 0; p <= 7; p++) {
+            for (byte p = 0; p <= 7; p++)
+            {
                 byte amt = Player.Inventory.getItemCount(p);
-                for (byte index = 0; index < amt; index++) {
+                for (byte index = 0; index < amt; index++)
+                {
                     Player.Inventory.removeItem(p, 0);
                 }
             }
