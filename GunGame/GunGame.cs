@@ -54,6 +54,7 @@ namespace GunGame
                 if (!SQLManager.Initialize())
                 {
                     GunGamePlayerConfig.Initialize();
+                    IsMySqlEnabled = false;
                 }
 
                 EventManager.Register();
