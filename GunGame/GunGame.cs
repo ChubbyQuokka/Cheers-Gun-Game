@@ -25,7 +25,6 @@ using Steamworks;
 
 using RocketLogger = Rocket.Core.Logging.Logger;
 
-//Random comment
 namespace GunGame
 {
     public class GunGame : RocketPlugin
