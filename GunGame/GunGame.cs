@@ -51,23 +51,38 @@ namespace GunGame
                 GameManager.Initialize();
                 CommandManager.Initialize();
 
-                if (!SQLManager.Initialize())
+                RocketLogger.Log(string.Format("Welcome to Gun Game v{0}!", Assembly.GetName().Version), ConsoleColor.Yellow);
+
+                if (GunGameConfig.instance.sqlSettings.enabled)
+                {
+                    if (!SQLManager.Initialize())
+                    {
+                        GunGamePlayerConfig.Initialize();
+                        IsMySqlEnabled = false;
+                        RocketLogger.Log("NOTE: Connection to MySQL database failed!", ConsoleColor.Yellow);
+                        RocketLogger.Log("Initialized with MySQL support disabled.", ConsoleColor.Yellow);
+                    }
+                    else
+                    {
+                        RocketLogger.Log("Initialized with MySQL support enabled.", ConsoleColor.Yellow);
+                    }
+                }
+                else
                 {
                     GunGamePlayerConfig.Initialize();
                     IsMySqlEnabled = false;
+                    RocketLogger.Log("Initialized with MySQL support disabled.", ConsoleColor.Yellow);
                 }
 
                 EventManager.Register();
 
-                RocketLogger.Log(string.Format("Welcome to Gun Game v{0}!", Assembly.GetName().Version.ToString()), ConsoleColor.Yellow);
-                //RocketLogger.Log("To start the timer, use /gg start!", ConsoleColor.Yellow);
-
-#pragma warning disable RECS0018
+#pragma warning disable RECS0018 // Comparison of floating point numbers with equality operator
                 if (GunGameConfig.instance.positions[0].x == 0 && GunGameConfig.instance.positions[0].y == 0 && GunGameConfig.instance.positions[0].z == 0)
-                    RocketLogger.Log("NOTE: You have not set the spawn positions yet!", ConsoleColor.Yellow);
+                    RocketLogger.Log("NOTE: You have not set any spawn positions yet!", ConsoleColor.Yellow);
 
                 if (GunGameConfig.instance.safezone.x == 0 && GunGameConfig.instance.safezone.y == 0 && GunGameConfig.instance.safezone.z == 0)
                     RocketLogger.Log("NOTE: You have not set the lobby yet!", ConsoleColor.Yellow);
+#pragma warning restore RECS0018 // Comparison of floating point numbers with equality operator
 
                 isLoaded = true;
             }
@@ -76,7 +91,7 @@ namespace GunGame
         protected override void Unload()
         {
             if (!wasUnloaded)
-                RocketLogger.LogError("Reloading plugin is unsupported! Plugin will not load until server is restarted.");
+                RocketLogger.LogError("Unloading plugin is unsupported! The olugin will not reload until server is restarted.");
 
             EventManager.Unregister();
 
@@ -143,338 +158,6 @@ namespace GunGame
         public static void Say(string message, Color color, params object[] objs)
         {
             UnturnedChat.Say(instance.Translate(message, objs), color);
-        }
-    }
-
-    public class GunGamePlayerConfig
-    {
-        static GunGamePlayerConfig instance;
-
-        public List<ulong> JoinedPlayers;
-
-        static string Directory = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Players.json";
-
-        public static void Initialize()
-        {
-            if (File.Exists(Directory))
-            {
-                string p = File.ReadAllText(Directory);
-
-                try
-                {
-                    instance = JsonConvert.DeserializeObject<GunGamePlayerConfig>(p);
-                }
-                catch
-                {
-                    instance = new GunGamePlayerConfig();
-                    instance.JoinedPlayers = new List<ulong>();
-                }
-            }
-        }
-
-        public static void Save()
-        {
-            string file = JsonConvert.SerializeObject(instance);
-
-            File.WriteAllText(Directory, file);
-        }
-
-        public static void AddPlayer(ulong p)
-        {
-            if (!Contains(p))
-            {
-                instance.JoinedPlayers.Add(p);
-                Save();
-            }
-        }
-
-        public static bool Contains(ulong p)
-        {
-            return instance.JoinedPlayers.Contains(p);
-        }
-    }
-
-    [JsonObject(MemberSerialization.OptIn)]
-    public class GunGameConfig
-    {
-        public static GunGameConfig instance;
-        static string Directory = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Config.json";
-        static string DirectoryFail = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Config_errored.json";
-
-        public static void RegisterSpawnPosition(Vector3 vector)
-        {
-            if (instance.positions[0].x == 0 && instance.positions[0].y == 0 && instance.positions[0].z == 0)
-                instance.positions = new Vec3[0];
-
-            List<Vec3> vectors = new List<Vec3>();
-
-            vectors.AddRange(instance.positions);
-            vectors.Add(new Vec3(vector));
-
-            instance.positions = vectors.ToArray();
-
-            SaveConfigFile();
-        }
-#pragma warning restore RECS0018
-
-        public static void RegisterSafezone(Vector3 vect)
-        {
-            instance.safezone = new Vec3(vect);
-
-            SaveConfigFile();
-        }
-
-        public static void Initialize()
-        {
-            if (File.Exists(Directory))
-            {
-
-                string file = File.ReadAllText(Directory);
-
-                try
-                {
-                    instance = JsonConvert.DeserializeObject<GunGameConfig>(file);
-                }
-                catch (Exception e)
-                {
-                    RocketLogger.LogException(e, null);
-                    RocketLogger.LogWarning("Config failed to load, reverting to default settings...");
-                    File.WriteAllText(DirectoryFail, file);
-                    LoadDefaultConfig();
-                    SaveConfigFile();
-                }
-            }
-            else
-            {
-                LoadDefaultConfig();
-                SaveConfigFile();
-            }
-        }
-
-        public static void LoadDefaultConfig()
-        {
-            GunGameConfig config = new GunGameConfig
-            {
-                maxRoundTime = 600,
-                minPlayers = 8,
-                broadcastKills = true,
-                maxSkills = true,
-                kickGroup = true,
-                mutePlayers = true,
-                positions = new Vec3[] { new Vec3(new Vector3(0, 0, 0)) },
-                safezone = new Vec3(new Vector3(0, 0, 0)),
-                weapons = new WeaponSettings()
-            };
-
-            Weapon maplestrike = new Weapon { ammo = 30, barrel = 0, grip = 8, id = 363, mag = 6, sight = 364, tactical = 0, mode = EFiremode.AUTO };
-            Weapon grizzly = new Weapon { ammo = 5, barrel = 0, grip = 143, id = 297, mag = 298, sight = 21, tactical = 0, mode = EFiremode.SEMI };
-
-            config.weapons.secondary = 121;
-            config.weapons.weapons = new Weapon[] { maplestrike, grizzly };
-
-            config.sqlSettings = new MySqlSettings("unturned", "localhost", 3306, "root", "toor");
-
-            instance = config;
-        }
-
-        public static void SaveConfigFile()
-        {
-            string json = JsonConvert.SerializeObject(instance, Formatting.Indented);
-
-            File.WriteAllText(Directory, json);
-        }
-
-        [JsonProperty(PropertyName = "MinimumPlayers")]
-        public int minPlayers;
-
-        [JsonProperty(PropertyName = "RoundTime")]
-        public int maxRoundTime;
-
-        [JsonProperty(PropertyName = "BroadcastKills")]
-        public bool broadcastKills;
-
-        [JsonProperty(PropertyName = "MaxSkills")]
-        public bool maxSkills;
-
-        [JsonProperty(PropertyName = "MutePlayers")]
-        public bool mutePlayers;
-
-        [JsonProperty(PropertyName = "KickGroupedPlayers")]
-        public bool kickGroup;
-
-        [JsonProperty(PropertyName = "Safezone")]
-        public Vec3 safezone;
-
-        [JsonProperty(PropertyName = "SpawnPositions")]
-        public Vec3[] positions;
-
-        [JsonProperty(PropertyName = "MySqlSettings")]
-        public MySqlSettings sqlSettings;
-
-        [JsonProperty(PropertyName = "WeaponSettings")]
-        public WeaponSettings weapons;
-
-        public struct WeaponSettings
-        {
-            [JsonProperty(PropertyName = "Secondary")]
-            public ushort secondary;
-
-            [JsonProperty(PropertyName = "Helmet")]
-            public ushort hat;
-
-            [JsonProperty(PropertyName = "Mask")]
-            public ushort mask;
-
-            [JsonProperty(PropertyName = "Vest")]
-            public ushort vest;
-
-            [JsonProperty(PropertyName = "Shirt")]
-            public ushort shirt;
-
-            [JsonProperty(PropertyName = "Pants")]
-            public ushort pants;
-
-            [JsonProperty(PropertyName = "PrimaryLadder")]
-            public Weapon[] weapons;
-
-        }
-
-        public struct Weapon
-        {
-            [JsonProperty(PropertyName = "ID")]
-            public ushort id;
-
-            [JsonProperty(PropertyName = "Ammo")]
-            public byte ammo;
-
-            [JsonProperty(PropertyName = "Magazine")]
-            public ushort mag;
-
-            [JsonProperty(PropertyName = "Sight")]
-            public ushort sight;
-
-            [JsonProperty(PropertyName = "Tactical")]
-            public ushort tactical;
-
-            [JsonProperty(PropertyName = "Grip")]
-            public ushort grip;
-
-            [JsonProperty(PropertyName = "Barrel")]
-            public ushort barrel;
-
-            [JsonConverter(typeof(StringEnumConverter))]
-            [JsonProperty(PropertyName = "Firemode")]
-            public EFiremode mode;
-
-            public Weapon(ushort id, byte ammo, ushort mag, ushort sight, ushort tactical, ushort grip, ushort barrel, EFiremode mode)
-            {
-                this.id = id;
-                this.ammo = ammo;
-                this.mag = mag;
-                this.sight = sight;
-                this.tactical = tactical;
-                this.grip = grip;
-                this.barrel = barrel;
-                this.mode = mode;
-            }
-
-            public Item GetUnturnedItem()
-            {
-                return UnturnedItems.AssembleItem(id, ammo, new Attachment(sight, 100), new Attachment(tactical, 100), new Attachment(grip, 100), new Attachment(barrel, 100), new Attachment(mag, 100), mode, 1, 100);
-            }
-        }
-
-        public struct MySqlSettings
-        {
-            [JsonProperty(PropertyName = "Database")]
-            public string database;
-
-            [JsonProperty(PropertyName = "IP")]
-            public string address;
-
-            [JsonProperty(PropertyName = "Port")]
-            public ushort port;
-
-            [JsonProperty(PropertyName = "Username")]
-            public string user;
-
-            [JsonProperty(PropertyName = "Password")]
-            public string pass;
-
-            public MySqlSettings(string database, string address, ushort port, string user, string pass)
-            {
-                this.database = database;
-                this.address = address;
-                this.port = port;
-                this.user = user;
-                this.pass = pass;
-            }
-        }
-
-        public struct Vec3
-        {
-            public float x;
-
-            public float y;
-
-            public float z;
-
-            [JsonIgnore]
-            public Vector3 Vector3
-            {
-                get { return new Vector3(x, y, z); }
-            }
-
-            public Vec3(Vector3 vector)
-            {
-                x = vector.x;
-                y = vector.y;
-                z = vector.z;
-            }
-        }
-    }
-}
-
-namespace Rocket.API
-{
-    public static class IRocketPlayerExtensions
-    {
-        public static bool HasPermissionFor(this IRocketPlayer player, IGunGameCommand command)
-        {
-            return (byte)command.PermissionLevel <= (byte)((UnturnedPlayer)player).GunGamePlayer().pLevel;
-        }
-    }
-}
-
-namespace Rocket.Unturned.Player
-{
-    public static class UnturnedPlayerExtensions
-    {
-        public static GunGamePlayerComponent GunGamePlayer(this UnturnedPlayer player)
-        {
-            return player.GetComponent<GunGamePlayerComponent>();
-        }
-    }
-}
-
-namespace System
-{
-    public static class UInt64Extensions
-    {
-        public static UnturnedPlayer GetPlayer(this ulong id)
-        {
-            return UnturnedPlayer.FromCSteamID(new CSteamID(id));
-        }
-    }
-
-    public static class EnumExtensions
-    {
-        public static bool HasFlags(this Enum x, Enum y)
-        {
-            byte _x = Convert.ToByte(x);
-            byte _y = Convert.ToByte(y);
-
-            return (_x & _y) == _y;
         }
     }
 }

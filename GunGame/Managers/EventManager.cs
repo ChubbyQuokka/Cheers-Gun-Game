@@ -9,7 +9,6 @@ using SDG.Unturned;
 using Steamworks;
 
 using UnityEngine;
-using System.Collections.Generic;
 
 namespace GunGame.Managers
 {
@@ -100,11 +99,22 @@ namespace GunGame.Managers
 #pragma warning disable RECS0018
         static void OnPlayerJoin(UnturnedPlayer player)
         {
-            if (GunGameConfig.instance.kickGroup && player.SteamGroupID != CSteamID.Nil)
-                player.GunGamePlayer().Kick();
+            SteamPlayer steam = player.SteamPlayer();
+
+            if (GunGameConfig.instance.forceNoGroup && player.SteamGroupID != CSteamID.Nil)
+                steam.playerID.group = CSteamID.Nil;
+
+            if (GunGameConfig.instance.disableCosmetics)
+            {
+                steam.maskItem = 0;
+                steam.hatItem = 0;
+                steam.vestItem = 0;
+                steam.shirtItem = 0;
+                steam.pantsItem = 0;
+            }
 
             if (GunGameConfig.instance.safezone.x != 0 && GunGameConfig.instance.safezone.y != 0 && GunGameConfig.instance.safezone.z != 0)
-                player.Teleport(GunGameConfig.instance.safezone.Vector3, 0);
+                player.Teleport(GunGameConfig.instance.safezone.Vector3, GunGameConfig.instance.safezone.rot);
 
             GameManager.OnlinePlayers.Add(player.CSteamID.m_SteamID);
 

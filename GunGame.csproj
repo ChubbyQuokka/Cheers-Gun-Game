@@ -78,6 +78,8 @@
     <Compile Include="GunGame\Managers\CommandManager.cs" />
     <Compile Include="GunGame\API\IGunGameCommand.cs" />
     <Compile Include="GunGame\Commands\Commands.cs" />
+    <Compile Include="GunGame\API\Extensions.cs" />
+    <Compile Include="GunGame\GunGameConfig.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -85,10 +87,7 @@
     <MonoDevelop>
       <Properties>
         <Policies>
-          <DotNetNamingPolicy DirectoryNamespaceAssociation="Hierarchical" ResourceNamePolicy="MSBuild">
-            <inheritsSet />
-            <inheritsScope />
-          </DotNetNamingPolicy>
+          <DotNetNamingPolicy DirectoryNamespaceAssociation="Hierarchical" ResourceNamePolicy="MSBuild" />
         </Policies>
       </Properties>
     </MonoDevelop>

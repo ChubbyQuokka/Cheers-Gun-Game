@@ -98,16 +98,6 @@ namespace GunGame
             deaths = 0;
         }
 
-        public void Kick()
-        {
-            Invoke("_Kick", 3);
-        }
-
-        void _Kick()
-        {
-            Player.Kick("Please you leave your group before joining.");
-        }
-
         public void DeathCallback(bool wasByKnife)
         {
             if (GunGame.IsMySqlEnabled)
@@ -131,14 +121,17 @@ namespace GunGame
             if (GameManager.isRunning)
             {
                 GiveKit(currentWeapon);
-                Invoke("TeleportAfterRespawn", 3);
+                Invoke("TeleportAfterRespawn", GunGameConfig.instance.advSettings.tpTime);
             }
         }
 
         void TeleportAfterRespawn()
         {
             if (GameManager.isRunning)
-                Player.Teleport(GameManager.GetSpawnPositionRR(), 0);
+            {
+                GunGameConfig.SpawnPosition sp = GameManager.GetSpawnPositionRR();
+                Player.Teleport(sp.Vector3, sp.rot);
+            }
         }
 
         public void KillCallback(bool wasWithKnife)
@@ -180,21 +173,30 @@ namespace GunGame
         public void GiveKit(byte kit)
         {
             kitRequest = kit;
-            Invoke("_GiveKit", 0.05f);
+            Invoke("_GiveKit", GunGameConfig.instance.advSettings.kitTime);
         }
 
         void _GiveKit()
         {
-            byte kit = kitRequest;
-            Item primary = GunGameConfig.instance.weapons.weapons[kit].GetUnturnedItem();
+            GunGameConfig.Weapon weapon = GunGameConfig.instance.weapons.weapons[kitRequest];
+
+            Item primary = weapon.GetUnturnedItem();
             Item secondary = UnturnedItems.AssembleItem(GunGameConfig.instance.weapons.secondary, 1, 100, null);
-            Item mag = UnturnedItems.AssembleItem(GunGameConfig.instance.weapons.weapons[kit].mag, GunGameConfig.instance.weapons.weapons[kit].ammo, 100, null);
+            Item mag = UnturnedItems.AssembleItem(weapon.mag, weapon.ammo, 100, null);
 
             Player.Inventory.items[0].tryAddItem(primary);
             Player.Inventory.items[1].tryAddItem(secondary);
-            Player.Inventory.items[2].tryAddItem(mag);
-            Player.Inventory.items[2].tryAddItem(mag);
 
+            for (int i = 0; i < weapon.magAmt; i++)
+            {
+                Player.Inventory.items[2].tryAddItem(mag);
+            }
+
+            Invoke("_Equip", GunGameConfig.instance.advSettings.equipTime);
+        }
+
+        void _Equip()
+        {
             Player.Player.equipment.tryEquip(0, 0, 0);
         }
 

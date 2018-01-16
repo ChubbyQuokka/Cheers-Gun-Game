@@ -1,5 +1,7 @@
 ﻿using System;
+
 using MySql.Data.MySqlClient;
+
 using Rocket.Core.Logging;
 
 namespace GunGame.Managers
@@ -8,22 +10,26 @@ namespace GunGame.Managers
     {
         public static MySqlConnection Connection;
 
+        static GunGameConfig.MySqlSettings settings;
+
         public static bool Initialize()
         {
             try
             {
-                Connection = new MySqlConnection(string.Format("SERVER={0};DATABASE={1};UID={2};PASSWORD={3};PORT={4};", GunGameConfig.instance.sqlSettings.address, GunGameConfig.instance.sqlSettings.database, GunGameConfig.instance.sqlSettings.user, GunGameConfig.instance.sqlSettings.pass, GunGameConfig.instance.sqlSettings.port));
+                settings = GunGameConfig.instance.sqlSettings;
+
+                Connection = new MySqlConnection($"SERVER={settings.address};DATABASE={settings.database};UID={settings.user};PASSWORD={settings.pass};PORT={settings.port};");
 
                 MySqlCommand cmd = Connection.CreateCommand();
 
-                cmd.CommandText = "show tables like 'gungame'";
+                cmd.CommandText = $"show tables like '{settings.table}'";
 
                 Connection.Open();
 
                 if (cmd.ExecuteScalar() == null)
                 {
                     MySqlCommand cmd2 = Connection.CreateCommand();
-                    cmd2.CommandText = "CREATE TABLE `gungame` (`steamid` bigint NOT NULL UNIQUE,`kills` integer NOT NULL,`deaths` integer NOT NULL,`rounds` integer NOT NULL,`first` integer NOT NULL,`second` integer NOT NULL,`third` integer NOT NULL, PRIMARY KEY (`steamid`))";
+                    cmd2.CommandText = $"CREATE TABLE `{settings.table}` (`steamid` bigint NOT NULL UNIQUE,`kills` integer NOT NULL,`deaths` integer NOT NULL,`rounds` integer NOT NULL,`first` integer NOT NULL,`second` integer NOT NULL,`third` integer NOT NULL, PRIMARY KEY (`steamid`))";
                     cmd2.ExecuteNonQuery();
                 }
 
@@ -32,7 +38,6 @@ namespace GunGame.Managers
             }
             catch (Exception e)
             {
-                Logger.Log("MySQL Initialization failed! Proceding without MySQL support...");
                 Logger.Log(e);
                 return false;
             }
@@ -44,7 +49,7 @@ namespace GunGame.Managers
 
             MySqlCommand cmd = Connection.CreateCommand();
 
-            cmd.CommandText = string.Format("SELECT `kills`,`deaths`,`rounds`,`first`,`second`,`third` FROM `gungame` WHERE `steamid`='{0}'", steamId);
+            cmd.CommandText = $"SELECT `kills`,`deaths`,`rounds`,`first`,`second`,`third` FROM `{settings.table}` WHERE `steamid`='{steamId}'";
             Connection.Open();
             MySqlDataReader dr = cmd.ExecuteReader();
 
@@ -80,11 +85,11 @@ namespace GunGame.Managers
 
             if (query.isFirstQuery)
             {
-                cmd.CommandText = string.Format("INSERT INTO `gungame` VALUES ('{0}','{1}','{2}','{3}','{4}','{5}','{6}')", steamId, query.kills, query.deaths, query.rounds, query.first, query.second, query.third);
+                cmd.CommandText = $"INSERT INTO `{settings.table}` VALUES ('{steamId}','{query.kills}','{query.deaths}','{query.rounds}','{query.first}','{query.second}','{query.third}')";
             }
             else
             {
-                cmd.CommandText = string.Format("UPDATE `gungame` SET `kills`='{0}', `deaths`='{1}', `rounds`='{2}', `first`='{3}', `second`='{4}', `third`='{5}' WHERE `steamid`='{6}'", query.kills, query.deaths, query.rounds, query.first, query.second, query.third, steamId);
+                cmd.CommandText = $"UPDATE `{settings.table}` SET `kills`='{query.kills}', `deaths`='{query.deaths}', `rounds`='{query.rounds}', `first`='{query.first}', `second`='{query.second}', `third`='{query.third}' WHERE `steamid`='{steamId}'";
             }
 
             Connection.Open();

@@ -17,7 +17,8 @@ namespace GunGame.Commands
         public ECommandTiming CommandTiming => ECommandTiming.STOPPED | ECommandTiming.WAITING;
         public void Execute(IRocketPlayer caller, string[] command)
         {
-            GunGameConfig.RegisterSafezone(((UnturnedPlayer)caller).Position);
+            UnturnedPlayer p = (UnturnedPlayer)caller;
+            GunGameConfig.RegisterSafezone(p.Position, p.Rotation);
             GunGame.Say(caller, "register_lobby", Color.green);
         }
     }
@@ -29,7 +30,8 @@ namespace GunGame.Commands
         public ECommandTiming CommandTiming => ECommandTiming.STOPPED | ECommandTiming.WAITING;
         public void Execute(IRocketPlayer caller, string[] command)
         {
-            GunGameConfig.RegisterSpawnPosition(((UnturnedPlayer)caller).Position);
+            UnturnedPlayer p = (UnturnedPlayer)caller;
+            GunGameConfig.RegisterSpawnPosition(p.Position, p.Rotation);
             GunGame.Say(caller, "register_spawn", Color.green);
         }
     }
@@ -87,7 +89,8 @@ namespace GunGame.Commands
         {
             if (!GameManager.isStopped)
                 GunGame.Say(caller, "invalid_start", Color.red);
-            else {
+            else
+            {
                 GameManager.isStopped = false;
                 GunGame.Say(caller, "start", Color.green);
             }
@@ -101,10 +104,12 @@ namespace GunGame.Commands
         public ECommandTiming CommandTiming => ECommandTiming.RUNNING | ECommandTiming.WAITING;
         public void Execute(IRocketPlayer caller, string[] args)
         {
-            if (!GameManager.isStopped) {
+            if (!GameManager.isStopped)
+            {
                 GameManager.isStopped = true;
                 GunGame.Say(caller, "stop", Color.green);
-            } else
+            }
+            else
                 GunGame.Say(caller, "invalid_stop", Color.red);
         }
     }
@@ -138,7 +143,7 @@ namespace GunGame.Commands
         {
             if (args.Length != 1 || !byte.TryParse(args[0], out byte kit) || kit >= GunGameConfig.instance.weapons.weapons.Length)
                 throw new GunGameException(EExceptionType.INVALID_ARGS);
-            
+
             GunGamePlayerComponent p = ((UnturnedPlayer)caller).GunGamePlayer();
 
             p.ClearItems();

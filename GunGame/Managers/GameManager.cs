@@ -37,7 +37,7 @@ namespace GunGame.Managers
         {
             float t = timer;
 
-            t /= 60;
+            t /= 60f;
 
             return Mathf.RoundToInt(timer);
         }
@@ -81,7 +81,7 @@ namespace GunGame.Managers
             foreach (ulong player in InGamePlayers)
             {
                 player.GetPlayer().GunGamePlayer().ClearItems();
-                player.GetPlayer().Teleport(GunGameConfig.instance.safezone.Vector3, 0);
+                player.GetPlayer().Teleport(GunGameConfig.instance.safezone.Vector3, GunGameConfig.instance.safezone.rot);
                 player.GetPlayer().Heal(100);
             }
 
@@ -128,8 +128,9 @@ namespace GunGame.Managers
 
             foreach (ulong player in OnlinePlayers)
             {
+                GunGameConfig.SpawnPosition sp = GetSpawnPositionRR();
                 InGamePlayers.Add(player);
-                player.GetPlayer().Teleport(GetSpawnPositionRR(), 0);
+                player.GetPlayer().Teleport(sp.Vector3, sp.rot);
                 player.GetPlayer().GunGamePlayer().EnterGame();
             }
 
@@ -144,9 +145,9 @@ namespace GunGame.Managers
             return InGamePlayers.Contains(player);
         }
 
-        public static Vector3 GetSpawnPositionRR()
+        public static GunGameConfig.SpawnPosition GetSpawnPositionRR()
         {
-            Vector3 vect = GunGameConfig.instance.positions[lastSpawn].Vector3;
+            GunGameConfig.SpawnPosition vect = GunGameConfig.instance.positions[lastSpawn];
 
             if (lastSpawn == GunGameConfig.instance.positions.Length - 1)
                 lastSpawn = 0;
