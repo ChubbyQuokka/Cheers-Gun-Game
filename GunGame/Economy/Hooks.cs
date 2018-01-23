@@ -36,19 +36,19 @@ namespace GunGame.Economy
 
     public class AviEconomyHook : IEconomyHook
     {
-        MethodInfo payAsServeMethod;
+        MethodInfo payAsServerMethod;
 
         public string DeterminingAssembly => "AviEconomy";
 
         public void Initialize()
         {
-            payAsServeMethod = EconomyManager.EconomyAssembly.GetType("com.aviadmini.rocketmod.AviEconomy.Bank").GetMethod("PayAsServer", BindingFlags.Public | BindingFlags.Static);
+            payAsServerMethod = EconomyManager.EconomyAssembly.GetType("com.aviadmini.rocketmod.AviEconomy.Bank").GetMethod("PayAsServer", BindingFlags.Public | BindingFlags.Static);
         }
 
         public void IncreaseBalance(IRocketPlayer p, decimal increaseBy)
         {
             decimal final = 0;
-            payAsServeMethod.Invoke(null, new object[] {p.Id, increaseBy, false, final, string.Empty});
+            payAsServerMethod.Invoke(null, new object[] {p.Id, increaseBy, false, final, string.Empty});
         }
     }
 }
