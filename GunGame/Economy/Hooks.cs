@@ -30,7 +30,7 @@ namespace GunGame.Economy
         {
             object uconomyInstance = uconomyInstanceField.GetValue(null);
             object databaseInstance = databaseField.GetValue(uconomyInstance);
-            increaseBalanceMethod.Invoke(databaseField, new object[] { p.Id, amt});
+            increaseBalanceMethod.Invoke(databaseInstance, new object[] { p.Id, amt});
         }
     }
 
