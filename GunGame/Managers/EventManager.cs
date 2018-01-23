@@ -1,4 +1,5 @@
-﻿using System;
+﻿#pragma warning disable RECS0018
+using System;
 
 using Rocket.Unturned;
 using Rocket.Unturned.Player;
@@ -14,7 +15,6 @@ namespace GunGame.Managers
 {
     public static class EventManager
     {
-
         public static void Register()
         {
             UnturnedPlayerEvents.OnPlayerDeath += OnPlayerDeath;
@@ -43,11 +43,9 @@ namespace GunGame.Managers
             bool isMelee = cause == EDeathCause.MELEE;
             bool isPunch = cause == EDeathCause.PUNCH;
 
-            if (isGun || isMelee || isPunch)
-            {
+            if (isGun || isMelee || isPunch) {
                 UnturnedPlayer m = UnturnedPlayer.FromCSteamID(murderer);
-                if (GunGameConfig.instance.broadcastKills)
-                {
+                if (GunGameConfig.instance.broadcastKills) {
                     string itemName;
 
                     if (isMelee)
@@ -57,26 +55,19 @@ namespace GunGame.Managers
                     else
                         itemName = ((ItemAsset)Assets.find(EAssetType.ITEM, GunGameConfig.instance.weapons.weapons[m.GunGamePlayer().currentWeapon].id)).itemName;
 
-                    foreach (ulong id in GameManager.InGamePlayers)
-                    {
-                        if (id == player.CSteamID.m_SteamID)
-                        {
+                    foreach (ulong id in GameManager.InGamePlayers) {
+                        if (id == player.CSteamID.m_SteamID) {
                             GunGame.Say(id, "kill", Color.red, m.DisplayName, itemName, player.DisplayName);
-                        }
-                        else if (id == murderer.m_SteamID)
-                        {
+                        } else if (id == murderer.m_SteamID) {
                             GunGame.Say(id, "kill", Color.green, m.DisplayName, itemName, player.DisplayName);
-                        }
-                        else
-                        {
+                        } else {
                             GunGame.Say(id, "kill", Color.magenta, m.DisplayName, itemName, player.DisplayName);
                         }
                     }
                 }
                 player.GunGamePlayer().DeathCallback(isMelee || isPunch);
                 m.GunGamePlayer().KillCallback(isMelee || isPunch);
-            }
-            else
+            } else
                 player.GunGamePlayer().ClearItems();
 
         }
@@ -89,14 +80,12 @@ namespace GunGame.Managers
 
         static void OnPlayerChatted(UnturnedPlayer player, ref Color color, string message, EChatMode mode, ref bool cancel)
         {
-            if (mode == EChatMode.GLOBAL && !message.StartsWith("/", StringComparison.Ordinal) && GunGameConfig.instance.mutePlayers)
-            {
+            if (mode == EChatMode.GLOBAL && !message.StartsWith("/", StringComparison.Ordinal) && GunGameConfig.instance.mutePlayers) {
                 GunGame.Say(player, "mute", Color.red);
                 cancel = true;
             }
         }
 
-#pragma warning disable RECS0018
         static void OnPlayerJoin(UnturnedPlayer player)
         {
             SteamPlayer steam = player.SteamPlayer();
@@ -104,8 +93,7 @@ namespace GunGame.Managers
             if (GunGameConfig.instance.forceNoGroup && player.SteamGroupID != CSteamID.Nil)
                 steam.playerID.group = CSteamID.Nil;
 
-            if (GunGameConfig.instance.disableCosmetics)
-            {
+            if (GunGameConfig.instance.disableCosmetics) {
                 steam.maskItem = 0;
                 steam.hatItem = 0;
                 steam.vestItem = 0;
@@ -116,30 +104,32 @@ namespace GunGame.Managers
             if (GunGameConfig.instance.safezone.x != 0 && GunGameConfig.instance.safezone.y != 0 && GunGameConfig.instance.safezone.z != 0)
                 player.Teleport(GunGameConfig.instance.safezone.Vector3, GunGameConfig.instance.safezone.rot);
 
-            GameManager.OnlinePlayers.Add(player.CSteamID.m_SteamID);
-
             if (GunGameConfig.instance.maxSkills)
                 player.GunGamePlayer().MaxSkills();
 
         }
-#pragma warning restore RECS0018
 
         static void OnPlayerLeave(UnturnedPlayer player)
         {
             if (GunGame.IsMySqlEnabled)
                 SQLManager.SavePlayer(player.CSteamID.m_SteamID, player.GunGamePlayer().data);
 
-            GameManager.OnlinePlayers.Remove(player.CSteamID.m_SteamID);
-
             if (GameManager.IsPlayerInGame(player.CSteamID.m_SteamID))
                 GameManager.InGamePlayers.Remove(player.CSteamID.m_SteamID);
         }
 
-        static void OnShutdown()
+        public static void OnShutdown()
         {
-            if (GunGame.IsMySqlEnabled)
-                foreach (ulong player in GameManager.OnlinePlayers)
-                    SQLManager.SavePlayer(player, player.GetPlayer().GunGamePlayer().data);
+            foreach (SteamPlayer player in Provider.clients) {
+                ulong id = player.playerID.steamID.m_SteamID;
+
+                if (GunGame.IsMySqlEnabled) {
+                    SQLManager.SavePlayer(id, id.GetPlayer().GunGamePlayer().data);
+                }
+
+                UnityEngine.Object.Destroy(id.GetPlayer().GunGamePlayer());
+            }
         }
     }
 }
+#pragma warning restore RECS0018

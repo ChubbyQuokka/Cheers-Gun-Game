@@ -28,62 +28,23 @@ namespace GunGame
         {
             bool isFirst = false;
 
-            if (GunGame.IsMySqlEnabled)
-            {
+            if (GunGame.IsMySqlEnabled) {
                 data = SQLManager.LoadPlayer(Player.CSteamID.m_SteamID);
-            }
-            else
-            {
+            } else {
                 isFirst = !GunGamePlayerConfig.Contains(Player.CSteamID.m_SteamID);
             }
 
-            if (R.Permissions.HasPermission(Player, new List<string> { "gungame.high" }))
-            {
+            if (R.Permissions.HasPermission(Player, new List<string> { "gungame.high" })) {
                 pLevel = EPermissionLevel.HIGH;
-            }
-            else if (R.Permissions.HasPermission(Player, new List<string> { "gungame.medium" }))
-            {
+            } else if (R.Permissions.HasPermission(Player, new List<string> { "gungame.medium" })) {
                 pLevel = EPermissionLevel.MEDIUM;
-            }
-            else if (R.Permissions.HasPermission(Player, new List<string> { "gungame.low" }))
-            {
+            } else if (R.Permissions.HasPermission(Player, new List<string> { "gungame.low" })) {
                 pLevel = EPermissionLevel.LOW;
-            }
-            else
-            {
+            } else {
                 pLevel = EPermissionLevel.NONE;
             }
 
-            if (GunGame.IsMySqlEnabled)
-            {
-                if (data.isFirstQuery)
-                {
-                    Player.GiveItem(GunGameConfig.instance.weapons.hat, 1);
-                    Player.GiveItem(GunGameConfig.instance.weapons.mask, 1);
-                    Player.GiveItem(GunGameConfig.instance.weapons.vest, 1);
-                    Player.GiveItem(GunGameConfig.instance.weapons.pants, 1);
-                    Player.GiveItem(GunGameConfig.instance.weapons.shirt, 1);
-                }
-                else
-                {
-                    ClearItems();
-                }
-            }
-            else
-            {
-                if (isFirst)
-                {
-                    Player.GiveItem(GunGameConfig.instance.weapons.hat, 1);
-                    Player.GiveItem(GunGameConfig.instance.weapons.mask, 1);
-                    Player.GiveItem(GunGameConfig.instance.weapons.vest, 1);
-                    Player.GiveItem(GunGameConfig.instance.weapons.pants, 1);
-                    Player.GiveItem(GunGameConfig.instance.weapons.shirt, 1);
-                }
-                else
-                {
-                    ClearItems();
-                }
-            }
+            ClearItems();
         }
 
         public void EnterGame()
@@ -107,8 +68,7 @@ namespace GunGame
 
             ClearItems();
 
-            if (wasByKnife && currentWeapon != 0)
-            {
+            if (wasByKnife && currentWeapon != 0) {
                 currentWeapon--;
             }
         }
@@ -118,8 +78,7 @@ namespace GunGame
             if (GunGameConfig.instance.maxSkills)
                 Player.GunGamePlayer().MaxSkills();
 
-            if (GameManager.isRunning)
-            {
+            if (GameManager.isRunning) {
                 GiveKit(currentWeapon);
                 Invoke("TeleportAfterRespawn", GunGameConfig.instance.advSettings.tpTime);
             }
@@ -127,8 +86,7 @@ namespace GunGame
 
         void TeleportAfterRespawn()
         {
-            if (GameManager.isRunning)
-            {
+            if (GameManager.isRunning) {
                 GunGameConfig.SpawnPosition sp = GameManager.GetSpawnPositionRR();
                 Player.Teleport(sp.Vector3, sp.rot);
             }
@@ -141,15 +99,11 @@ namespace GunGame
 
             kills++;
 
-            if (!wasWithKnife)
-            {
-                if (currentWeapon == GunGameConfig.instance.weapons.weapons.Length - 1)
-                {
+            if (!wasWithKnife) {
+                if (currentWeapon == GunGameConfig.instance.weapons.weapons.Length - 1) {
                     currentWeapon++;
                     GameManager.RequestFinish();
-                }
-                else
-                {
+                } else {
                     ClearItems();
                     currentWeapon++;
                     GiveKit(currentWeapon);
@@ -159,14 +113,40 @@ namespace GunGame
 
         public void ClearItems()
         {
-            for (byte p = 0; p <= 7; p++)
-            {
+            for (byte p = 0; p <= 7; p++) {
                 byte amt = Player.Inventory.getItemCount(p);
-                for (byte index = 0; index < amt; index++)
-                {
+                for (byte index = 0; index < amt; index++) {
                     Player.Inventory.removeItem(p, 0);
                 }
             }
+
+            Player.Player.clothing.askWearHat(0, 0, new byte[0], false);
+            for (byte i = 0; i < Player.Inventory.getItemCount(2); i++)
+                Player.Inventory.removeItem(2, 0);
+
+            Player.Player.clothing.askWearShirt(0, 0, new byte[0], false);
+            for (byte i = 0; i < Player.Inventory.getItemCount(2); i++)
+                Player.Inventory.removeItem(2, 0);
+
+            Player.Player.clothing.askWearPants(0, 0, new byte[0], false);
+            for (byte i = 0; i < Player.Inventory.getItemCount(2); i++)
+                Player.Inventory.removeItem(2, 0);
+
+            Player.Player.clothing.askWearVest(0, 0, new byte[0], false);
+            for (byte i = 0; i < Player.Inventory.getItemCount(2); i++)
+                Player.Inventory.removeItem(2, 0);
+
+            Player.Player.clothing.askWearMask(0, 0, new byte[0], false);
+            for (byte i = 0; i < Player.Inventory.getItemCount(2); i++)
+                Player.Inventory.removeItem(2, 0);
+
+            Player.Player.clothing.askWearBackpack(0, 0, new byte[0], false);
+            for (byte i = 0; i < Player.Inventory.getItemCount(2); i++)
+                Player.Inventory.removeItem(2, 0);
+
+            Player.Player.clothing.askWearGlasses(0, 0, new byte[0], false);
+            for (byte i = 0; i < Player.Inventory.getItemCount(2); i++)
+                Player.Inventory.removeItem(2, 0);
         }
 
         byte kitRequest;
@@ -178,6 +158,12 @@ namespace GunGame
 
         void _GiveKit()
         {
+            Player.GiveItem(GunGameConfig.instance.weapons.hat, 1);
+            Player.GiveItem(GunGameConfig.instance.weapons.mask, 1);
+            Player.GiveItem(GunGameConfig.instance.weapons.vest, 1);
+            Player.GiveItem(GunGameConfig.instance.weapons.pants, 1);
+            Player.GiveItem(GunGameConfig.instance.weapons.shirt, 1);
+
             GunGameConfig.Weapon weapon = GunGameConfig.instance.weapons.weapons[kitRequest];
 
             Item primary = weapon.GetUnturnedItem();
@@ -187,8 +173,7 @@ namespace GunGame
             Player.Inventory.items[0].tryAddItem(primary);
             Player.Inventory.items[1].tryAddItem(secondary);
 
-            for (int i = 0; i < weapon.magAmt; i++)
-            {
+            for (int i = 0; i < weapon.magAmt; i++) {
                 Player.Inventory.items[2].tryAddItem(mag);
             }
 

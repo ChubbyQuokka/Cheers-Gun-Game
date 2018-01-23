@@ -23,10 +23,9 @@ namespace GunGame.Managers
             RegisterCommand("setlobby", new CommandSetLobby());
             RegisterCommand("setspawn", new CommandSetSpawn());
             RegisterCommand("status", new CommandStatus());
-            RegisterCommand("start", new CommandStart());
-            RegisterCommand("stop", new CommandStop());
-            RegisterCommand("forcestart", new CommandForceStart());
-            RegisterCommand("forcestop", new CommandForceStop());
+            RegisterCommand("timer", new CommandTimer());
+            RegisterCommand("start", new CommandForceStart());
+            RegisterCommand("stop", new CommandForceStop());
             RegisterCommand("help", new CommandHelp());
             RegisterCommand("kit", new CommandGiveKit());
         }
@@ -35,7 +34,7 @@ namespace GunGame.Managers
         {
             if (TryGetCommand(args[0], out IGunGameCommand cmd)) {
 
-                if (!player.HasPermissionFor(cmd) && !player.IsAdmin)
+                if (!player.HasGGPermissionFor(cmd) && !player.IsAdmin)
                     throw new GunGameException(cmd.PermissionLevel);
 
                 ECommandTiming current;
@@ -63,7 +62,7 @@ namespace GunGame.Managers
 
         public static bool TryGetCommand(string key, out IGunGameCommand cmd)
         {
-            return commands.TryGetValue(key, out cmd);
+            return commands.TryGetValue(key.ToLowerInvariant(), out cmd);
         }
 
         public static bool RegisterCommand(string name, IGunGameCommand command)
@@ -101,7 +100,7 @@ namespace GunGame
 
         public List<string> Permissions => new List<string> { "gungame" };
 
-        public string Syntax => "";
+        public string Syntax => "<command> <args>";
 
         public void Execute(IRocketPlayer caller, string[] command)
         {

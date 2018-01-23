@@ -15,7 +15,6 @@ using UnityEngine;
 
 namespace GunGame
 {
-
     public class GunGamePlayerConfig
     {
         static GunGamePlayerConfig instance;
@@ -26,16 +25,12 @@ namespace GunGame
 
         public static void Initialize()
         {
-            if (File.Exists(Directory))
-            {
+            if (File.Exists(Directory)) {
                 string p = File.ReadAllText(Directory);
 
-                try
-                {
+                try {
                     instance = JsonConvert.DeserializeObject<GunGamePlayerConfig>(p);
-                }
-                catch
-                {
+                } catch {
                     instance = new GunGamePlayerConfig
                     {
                         JoinedPlayers = new List<ulong>()
@@ -53,8 +48,7 @@ namespace GunGame
 
         public static void AddPlayer(ulong p)
         {
-            if (!Contains(p))
-            {
+            if (!Contains(p)) {
                 instance.JoinedPlayers.Add(p);
                 Save();
             }
@@ -98,6 +92,17 @@ namespace GunGame
                 tpTime = 3f,
                 kitTime = 0.05f,
                 equipTime = 0.05f
+            },
+
+            econSettings = new EconomySettings
+            {
+                enabled = false,
+                rewards = new Reward[]
+                {
+                    new Reward(1, "st", 500),
+                    new Reward(2, "nd", 100),
+                    new Reward(3, "rd", 50)
+                }
             }
         };
 
@@ -130,91 +135,217 @@ namespace GunGame
 
         public static void Initialize()
         {
-            if (File.Exists(Directory))
-            {
+            if (File.Exists(Directory)) {
                 string file = File.ReadAllText(Directory);
 
-                try
-                {
-                    instance = JsonConvert.DeserializeObject<GunGameConfig>(file);
-                }
-                catch
-                {
-                    try
-                    {
-                        JObject jObj = JObject.Parse(file);
-                        instance = new GunGameConfig();
+                try {
+                    JObject jObj = JObject.Parse(file);
+                    instance = new GunGameConfig();
 
-                        //All basic assignments
-                        Assign(jObj, "MinimumPlayers", ref instance.minPlayers, Default.minPlayers);
-                        Assign(jObj, "RoundTime", ref instance.maxRoundTime, Default.maxRoundTime);
-                        Assign(jObj, "BroadcastKills", ref instance.broadcastKills, Default.broadcastKills);
-                        Assign(jObj, "MaxSkills", ref instance.maxSkills, Default.maxSkills);
-                        Assign(jObj, "MuteGlobalChat", ref instance.mutePlayers, Default.mutePlayers);
-                        Assign(jObj, "ForceNoGroups", ref instance.forceNoGroup, Default.forceNoGroup);
-                        Assign(jObj, "Lobby", ref instance.safezone, Default.safezone);
-                        Assign(jObj, "SpawnPositions", ref instance.positions, Default.positions);
-                        Assign(jObj, "DisableCosmetics", ref instance.disableCosmetics, Default.disableCosmetics);
+                    bool hasDefaulted = false;
 
+                    //All basic assignments
+                    Assign(jObj, "MinimumPlayers", ref instance.minPlayers, Default.minPlayers, ref hasDefaulted);
+                    Assign(jObj, "RoundTime", ref instance.maxRoundTime, Default.maxRoundTime, ref hasDefaulted);
+                    Assign(jObj, "BroadcastKills", ref instance.broadcastKills, Default.broadcastKills, ref hasDefaulted);
+                    Assign(jObj, "MaxSkills", ref instance.maxSkills, Default.maxSkills, ref hasDefaulted);
+                    Assign(jObj, "MuteGlobalChat", ref instance.mutePlayers, Default.mutePlayers, ref hasDefaulted);
+                    Assign(jObj, "ForceNoGroups", ref instance.forceNoGroup, Default.forceNoGroup, ref hasDefaulted);
+                    Assign(jObj, "DisableCosmetics", ref instance.disableCosmetics, Default.disableCosmetics, ref hasDefaulted);
+
+                    //Assign(jObj, "Lobby", ref instance.safezone, Default.safezone, ref hasDefaulted);
+                    //Assign(jObj, "SpawnPositions", ref instance.positions, Default.positions);
+
+                    JObject lobby = (JObject)jObj["Lobby"];
+
+                    if (lobby != null) {
+                        instance.safezone = new SpawnPosition();
+                        ref SpawnPosition lobbySettings = ref instance.safezone;
+
+                        Assign(lobby, "x", ref lobbySettings.x, 0f, ref hasDefaulted);
+                        Assign(lobby, "y", ref lobbySettings.y, 0f, ref hasDefaulted);
+                        Assign(lobby, "z", ref lobbySettings.z, 0f, ref hasDefaulted);
+                        Assign(lobby, "rot", ref lobbySettings.rot, 0f, ref hasDefaulted);
+                    } else {
+                        instance.safezone = Default.safezone;
+                        hasDefaulted = true;
+                    }
+
+                    JObject econ = (JObject)jObj["EconomySettings"];
+
+                    if (econ != null) {
+                        instance.econSettings = new EconomySettings();
+                        ref EconomySettings econSettings = ref instance.econSettings;
+
+                        Assign(econ, "Enabled", ref econSettings.enabled, false, ref hasDefaulted);
+
+                        JArray rewards = (JArray)econ["Rewards"];
+
+                        if (rewards != null) {
+                            ref Reward[] rewardsSettings = ref econSettings.rewards;
+                            rewardsSettings = new Reward[rewards.Count];
+
+                            for (int i = 0; i < rewards.Count; i++) {
+                                Reward temp = new Reward();
+                                JObject tempObj = (JObject)rewards[i];
+
+                                Assign(tempObj, "Place", ref temp.place, (byte)0, ref hasDefaulted);
+                                Assign(tempObj, "OrdinalIndicator", ref temp.ordinal, string.Empty, ref hasDefaulted);
+                                Assign(tempObj, "Reward", ref temp.reward, 0, ref hasDefaulted);
+
+                                rewardsSettings[i] = temp;
+                            }
+                        } else {
+                            econSettings.rewards = Default.econSettings.rewards;
+                            hasDefaulted = true;
+                        }
+                    } else {
+                        instance.econSettings = Default.econSettings;
+                        hasDefaulted = true;
+                    }
+
+                    JArray spawns = (JArray)jObj["SpawnPositions"];
+
+                    if (spawns != null) {
+                        ref SpawnPosition[] spawnSettings = ref instance.positions;
+                        spawnSettings = new SpawnPosition[spawns.Count];
+
+                        for (int i = 0; i < spawns.Count; i++) {
+                            SpawnPosition temp = new SpawnPosition();
+                            JObject tempObj = (JObject)spawns[i];
+
+                            Assign(tempObj, "x", ref temp.x, 0f, ref hasDefaulted);
+                            Assign(tempObj, "y", ref temp.y, 0f, ref hasDefaulted);
+                            Assign(tempObj, "z", ref temp.z, 0f, ref hasDefaulted);
+                            Assign(tempObj, "rot", ref temp.rot, 0f, ref hasDefaulted);
+
+                            spawnSettings[i] = temp;
+                        }
+                    } else {
+                        instance.positions = Default.positions;
+                        hasDefaulted = true;
+                    }
+
+                    JObject sql = (JObject)jObj["MySqlSettings"];
+
+                    if (sql != null) {
                         instance.sqlSettings = new MySqlSettings();
-                        JObject sql = (JObject)jObj["MySqlSettings"];
                         ref MySqlSettings sqlSettings = ref instance.sqlSettings;
 
                         //MySQL assignments
-                        Assign(sql, "MySqlEnabled", ref sqlSettings.enabled, Default.sqlSettings.enabled);
-                        Assign(sql, "Database", ref sqlSettings.database, Default.sqlSettings.database);
-                        Assign(sql, "Table", ref sqlSettings.table, Default.sqlSettings.table);
-                        Assign(sql, "IP", ref sqlSettings.address, Default.sqlSettings.address);
-                        Assign(sql, "Port", ref sqlSettings.port, Default.sqlSettings.port);
-                        Assign(sql, "Username", ref sqlSettings.user, Default.sqlSettings.user);
-                        Assign(sql, "Password", ref sqlSettings.pass, Default.sqlSettings.pass);
+                        Assign(sql, "MySqlEnabled", ref sqlSettings.enabled, Default.sqlSettings.enabled, ref hasDefaulted);
+                        Assign(sql, "Database", ref sqlSettings.database, Default.sqlSettings.database, ref hasDefaulted);
+                        Assign(sql, "Table", ref sqlSettings.table, Default.sqlSettings.table, ref hasDefaulted);
+                        Assign(sql, "IP", ref sqlSettings.address, Default.sqlSettings.address, ref hasDefaulted);
+                        Assign(sql, "Port", ref sqlSettings.port, Default.sqlSettings.port, ref hasDefaulted);
+                        Assign(sql, "Username", ref sqlSettings.user, Default.sqlSettings.user, ref hasDefaulted);
+                        Assign(sql, "Password", ref sqlSettings.pass, Default.sqlSettings.pass, ref hasDefaulted);
+                    } else {
+                        instance.sqlSettings = Default.sqlSettings;
+                        hasDefaulted = true;
+                    }
 
+                    JObject weapon = (JObject)jObj["WeaponSettings"];
+                    if (weapon != null) {
                         instance.weapons = new WeaponSettings();
-                        JObject weapon = (JObject)jObj["WeaponSettings"];
                         ref WeaponSettings weaponSettings = ref instance.weapons;
 
                         //Weapon assignments
-                        Assign(weapon, "Secondary", ref weaponSettings.secondary, Default.weapons.secondary);
-                        Assign(weapon, "Helmet", ref weaponSettings.hat, Default.weapons.hat);
-                        Assign(weapon, "Mask", ref weaponSettings.mask, Default.weapons.mask);
-                        Assign(weapon, "Vest", ref weaponSettings.vest, Default.weapons.vest);
-                        Assign(weapon, "Shirt", ref weaponSettings.shirt, Default.weapons.shirt);
-                        Assign(weapon, "Pants", ref weaponSettings.pants, Default.weapons.pants);
-                        Assign(weapon, "PrimaryLadder", ref weaponSettings.weapons, Default.weapons.weapons);
+                        Assign(weapon, "Secondary", ref weaponSettings.secondary, Default.weapons.secondary, ref hasDefaulted);
+                        Assign(weapon, "Helmet", ref weaponSettings.hat, Default.weapons.hat, ref hasDefaulted);
+                        Assign(weapon, "Mask", ref weaponSettings.mask, Default.weapons.mask, ref hasDefaulted);
+                        Assign(weapon, "Vest", ref weaponSettings.vest, Default.weapons.vest, ref hasDefaulted);
+                        Assign(weapon, "Shirt", ref weaponSettings.shirt, Default.weapons.shirt, ref hasDefaulted);
+                        Assign(weapon, "Pants", ref weaponSettings.pants, Default.weapons.pants, ref hasDefaulted);
 
-                        //Advanced assignments
+                        JArray ladder = (JArray)weapon["PrimaryLadder"];
+
+                        if (ladder != null) {
+                            ref Weapon[] ladderSettings = ref instance.weapons.weapons;
+                            ladderSettings = new Weapon[ladder.Count];
+
+                            for (int i = 0; i < ladderSettings.Length; i++) {
+                                Weapon temp = new Weapon();
+                                JObject tempObj = (JObject)ladder[i];
+
+                                Assign(tempObj, "ID", ref temp.id, (ushort)0, ref hasDefaulted);
+                                Assign(tempObj, "Ammo", ref temp.ammo, (byte)0, ref hasDefaulted);
+                                Assign(tempObj, "Magazine", ref temp.mag, (ushort)0, ref hasDefaulted);
+                                Assign(tempObj, "MagazineAmount", ref temp.magAmt, (byte)2, ref hasDefaulted);
+                                Assign(tempObj, "Sight", ref temp.sight, (ushort)0, ref hasDefaulted);
+                                Assign(tempObj, "Tactical", ref temp.tactical, (ushort)0, ref hasDefaulted);
+                                Assign(tempObj, "Grip", ref temp.grip, (ushort)0, ref hasDefaulted);
+                                Assign(tempObj, "Barrel", ref temp.barrel, (ushort)0, ref hasDefaulted);
+
+                                string firemode = "";
+                                Assign(tempObj, "Firemode", ref firemode, "SAFETY", ref hasDefaulted);
+
+                                switch (firemode.ToLowerInvariant()) {
+                                    case "safety":
+                                        temp.mode = EFiremode.SAFETY;
+                                        break;
+                                    case "semi":
+                                        temp.mode = EFiremode.SEMI;
+                                        break;
+                                    case "auto":
+                                        temp.mode = EFiremode.AUTO;
+                                        break;
+                                    case "burst":
+                                        temp.mode = EFiremode.BURST;
+                                        break;
+                                    default:
+                                        temp.mode = EFiremode.SAFETY;
+                                        hasDefaulted = true;
+                                        break;
+                                }
+
+                                ladderSettings[i] = temp;
+                            }
+                        } else {
+                            instance.weapons.weapons = Default.weapons.weapons;
+                            hasDefaulted = true;
+                        }
+                    } else {
+                        instance.weapons = Default.weapons;
+                        hasDefaulted = true;
+                    }
+
+                    //Advanced assignments
+                    JObject adv = (JObject)jObj["AdvancedSettings"];
+
+                    if (adv != null) {
                         instance.advSettings = new AdvanceSettings();
-                        JObject adv = (JObject)jObj["AdvancedSettings"];
                         ref AdvanceSettings advSettings = ref instance.advSettings;
 
-                        Assign(adv, "RespawnTeleportTime", ref advSettings.tpTime, Default.advSettings.tpTime);
-                        Assign(adv, "RespawnKitTime", ref advSettings.kitTime, Default.advSettings.kitTime);
-                        Assign(adv, "KitEquipTime", ref advSettings.equipTime, Default.advSettings.equipTime);
-
-                        SaveConfigFile();
-
+                        Assign(adv, "RespawnTeleportTime", ref advSettings.tpTime, Default.advSettings.tpTime, ref hasDefaulted);
+                        Assign(adv, "RespawnKitTime", ref advSettings.kitTime, Default.advSettings.kitTime, ref hasDefaulted);
+                        Assign(adv, "KitEquipTime", ref advSettings.equipTime, Default.advSettings.equipTime, ref hasDefaulted);
+                    } else {
+                        instance.advSettings = Default.advSettings;
+                        hasDefaulted = true;
                     }
-                    catch (Exception e)
-                    {
-                        RocketLogger.LogException(e, null);
-                        RocketLogger.LogWarning("Config failed to load, reverting to default settings...");
-                        File.WriteAllText($"{DirectoryFail}{DateTime.UtcNow.ToShortTimeString()}.json", file);
-                        LoadDefaultConfig();
+
+                    if (hasDefaulted) {
+                        File.WriteAllText($"{DirectoryFail}{GunGame.UnixTimestamp}.json", file);
                         SaveConfigFile();
+                        RocketLogger.Log($"ERROR: Some keys inside the config were reverted to their default value. A copy of your old config has been saved as Config_{GunGame.UnixTimestamp}.json!", ConsoleColor.Red);
                     }
+
+                } catch (Exception e) {
+                    RocketLogger.LogException(e, null);
+                    RocketLogger.Log($"ERROR: Config failed to load, everything will revert to default. A copy of your old config has been saved as Config_{GunGame.UnixTimestamp}.json!", ConsoleColor.Red);
+                    File.WriteAllText($"{DirectoryFail}{GunGame.UnixTimestamp}.json", file);
+                    LoadDefaultConfig();
+                    SaveConfigFile();
                 }
-            }
-            else
-            {
+            } else {
                 LoadDefaultConfig();
                 SaveConfigFile();
             }
 
             //Ensure that no player can change their group
-            if (instance.forceNoGroup)
-            {
-                switch (Provider.mode)
-                {
+            if (instance.forceNoGroup) {
+                switch (Provider.mode) {
                     case EGameMode.EASY:
                         Provider.configData.Easy.Gameplay.Allow_Static_Groups = false;
                         Provider.configData.Easy.Gameplay.Allow_Dynamic_Groups = false;
@@ -231,9 +362,19 @@ namespace GunGame
             }
         }
 
-        static void Assign<T>(JObject jObj, string key, ref T assignee, T def)
+        static void Assign<T>(JObject jObj, string key, ref T assignee, T def, ref bool wasDefaulted)
         {
-            assignee = jObj[key].HasValues ? jObj[key].Value<T>() : def;
+            try {
+                if (jObj[key].Value<object>() != null) {
+                    assignee = jObj[key].Value<T>();
+                } else {
+                    assignee = def;
+                    wasDefaulted = true;
+                }
+            } catch {
+                assignee = def;
+                wasDefaulted = true;
+            }
         }
 
         static void LoadDefaultConfig()
@@ -272,11 +413,14 @@ namespace GunGame
         [JsonProperty(PropertyName = "Lobby")]
         public SpawnPosition safezone;
 
-        [JsonProperty(PropertyName = "SpawnPositions")]
-        public SpawnPosition[] positions;
+        [JsonProperty(PropertyName = "EconomySettings")]
+        public EconomySettings econSettings;
 
         [JsonProperty(PropertyName = "MySqlSettings")]
         public MySqlSettings sqlSettings;
+
+        [JsonProperty(PropertyName = "SpawnPositions")]
+        public SpawnPosition[] positions;
 
         [JsonProperty(PropertyName = "WeaponSettings")]
         public WeaponSettings weapons;
@@ -367,6 +511,33 @@ namespace GunGame
             public Item GetUnturnedItem()
             {
                 return UnturnedItems.AssembleItem(id, ammo, new Attachment(sight, 100), new Attachment(tactical, 100), new Attachment(grip, 100), new Attachment(barrel, 100), new Attachment(mag, 100), mode, 1, 100);
+            }
+        }
+
+        public struct EconomySettings
+        {
+            [JsonProperty(PropertyName = "MySqlEnabled")]
+            public bool enabled;
+
+            [JsonProperty(PropertyName = "Rewards")]
+            public Reward[] rewards;
+        }
+
+        public struct Reward
+        {
+            [JsonProperty(PropertyName = "Place")]
+            public byte place;
+
+            [JsonProperty(PropertyName = "OrdinalIndicator")]
+            public string ordinal;
+
+            [JsonProperty(PropertyName = "Reward")]
+            public decimal reward;
+
+            public Reward(Byte place, string ordinal, decimal reward) {
+                this.place = place;
+                this.ordinal = ordinal;
+                this.reward = reward;
             }
         }
 

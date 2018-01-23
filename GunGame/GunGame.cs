@@ -1,6 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
+﻿#pragma warning disable RECS0018
+using System;
 using System.Reflection;
 
 using UnityEngine;
@@ -9,21 +8,14 @@ using Rocket.API;
 using Rocket.API.Collections;
 using Rocket.Core.Plugins;
 using Rocket.Unturned.Chat;
-using Rocket.Unturned.Items;
 using Rocket.Unturned.Player;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-
-using SDG.Unturned;
-
-using GunGame;
-using GunGame.API;
 using GunGame.Managers;
 
 using Steamworks;
 
 using RocketLogger = Rocket.Core.Logging.Logger;
+using SDG.Unturned;
 
 namespace GunGame
 {
@@ -32,74 +24,58 @@ namespace GunGame
         static GunGame instance;
 
         static bool isLoaded;
-        static bool wasUnloaded;
 
         public static bool IsMySqlEnabled = true;
+
+        public static int UnixTimestamp { get { return (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds; } }
 
         //This is for a future update :D
         //const string SteamApiKey = "D57A6B0437CB735FFEE9317A9D42CCAA";
 
         protected override void Load()
         {
-            if (wasUnloaded)
-                UnloadPlugin();
-            else
-            {
-                instance = this;
+            instance = this;
 
-                GunGameConfig.Initialize();
-                GameManager.Initialize();
-                CommandManager.Initialize();
+            RocketLogger.Log(string.Format("Welcome to Gun Game v{0}!", Assembly.GetName().Version), ConsoleColor.Yellow);
+            RocketLogger.Log("For any update information or support join my Discord Guild: discord.gg/BaE4Tka!");
 
-                RocketLogger.Log(string.Format("Welcome to Gun Game v{0}!", Assembly.GetName().Version), ConsoleColor.Yellow);
+            GunGameConfig.Initialize();
+            GameManager.Initialize();
+            CommandManager.Initialize();
+            EconomyManager.Initialize();
 
-                if (GunGameConfig.instance.sqlSettings.enabled)
-                {
-                    if (!SQLManager.Initialize())
-                    {
-                        GunGamePlayerConfig.Initialize();
-                        IsMySqlEnabled = false;
-                        RocketLogger.Log("NOTE: Connection to MySQL database failed!", ConsoleColor.Yellow);
-                        RocketLogger.Log("Initialized with MySQL support disabled.", ConsoleColor.Yellow);
-                    }
-                    else
-                    {
-                        RocketLogger.Log("Initialized with MySQL support enabled.", ConsoleColor.Yellow);
-                    }
-                }
-                else
-                {
+            if (GunGameConfig.instance.sqlSettings.enabled) {
+                if (!SQLManager.Initialize()) {
                     GunGamePlayerConfig.Initialize();
                     IsMySqlEnabled = false;
+                    RocketLogger.Log("NOTE: Connection to MySQL database failed!", ConsoleColor.Yellow);
                     RocketLogger.Log("Initialized with MySQL support disabled.", ConsoleColor.Yellow);
+                } else {
+                    RocketLogger.Log("Initialized with MySQL support enabled.", ConsoleColor.Yellow);
                 }
-
-                EventManager.Register();
-
-#pragma warning disable RECS0018 // Comparison of floating point numbers with equality operator
-                if (GunGameConfig.instance.positions[0].x == 0 && GunGameConfig.instance.positions[0].y == 0 && GunGameConfig.instance.positions[0].z == 0)
-                    RocketLogger.Log("NOTE: You have not set any spawn positions yet!", ConsoleColor.Yellow);
-
-                if (GunGameConfig.instance.safezone.x == 0 && GunGameConfig.instance.safezone.y == 0 && GunGameConfig.instance.safezone.z == 0)
-                    RocketLogger.Log("NOTE: You have not set the lobby yet!", ConsoleColor.Yellow);
-#pragma warning restore RECS0018 // Comparison of floating point numbers with equality operator
-
-                isLoaded = true;
+            } else {
+                GunGamePlayerConfig.Initialize();
+                IsMySqlEnabled = false;
+                RocketLogger.Log("Initialized with MySQL support disabled.", ConsoleColor.Yellow);
             }
+
+            EventManager.Register();
+
+            if (GunGameConfig.instance.positions[0].x == 0 && GunGameConfig.instance.positions[0].y == 0 && GunGameConfig.instance.positions[0].z == 0)
+                RocketLogger.Log("NOTE: You have not set any spawn positions yet!", ConsoleColor.Yellow);
+
+            if (GunGameConfig.instance.safezone.x == 0 && GunGameConfig.instance.safezone.y == 0 && GunGameConfig.instance.safezone.z == 0)
+                RocketLogger.Log("NOTE: You have not set the lobby yet!", ConsoleColor.Yellow);
+
+            isLoaded = true;
         }
 
         protected override void Unload()
         {
-            if (!wasUnloaded)
-                RocketLogger.LogError("Unloading plugin is unsupported! The olugin will not reload until server is restarted.");
-
             EventManager.Unregister();
+            EventManager.OnShutdown();
+            GameManager.InGamePlayers.Clear();
 
-            if (IsMySqlEnabled)
-                foreach (ulong player in GameManager.OnlinePlayers)
-                    SQLManager.SavePlayer(player, player.GetPlayer().GunGamePlayer().data);
-
-            wasUnloaded = true;
             isLoaded = false;
         }
 
@@ -140,7 +116,8 @@ namespace GunGame
                     {"help", "{0} : {1}"},
                     {"invalid_cmd_help", "We couldn't find any info on your requested command!"},
                     {"invalid_perms_help", "You don't have permission to view info on your requested command!"},
-                    {"kit", "You have been givin kit {0}!"}
+                    {"kit", "You have been given kit {0}!"},
+                    {"reward", "You have been rewarded {0} for placing {1}!"}
                 };
             }
         }
@@ -161,3 +138,4 @@ namespace GunGame
         }
     }
 }
+#pragma warning restore RECS0018

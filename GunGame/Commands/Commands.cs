@@ -1,10 +1,13 @@
 ﻿using System;
+
 using GunGame.API;
 using GunGame.API.Exceptions;
 using GunGame.Managers;
 
 using Rocket.API;
 using Rocket.Unturned.Player;
+
+using SDG.Unturned;
 
 using UnityEngine;
 
@@ -47,8 +50,8 @@ namespace GunGame.Commands
                 GunGame.Say(caller, "inprogress", Color.green, GameManager.GetTime());
             else if (GameManager.isStopped)
                 GunGame.Say(caller, "stopped", Color.green);
-            else if (GameManager.OnlinePlayers.Count < GunGameConfig.instance.minPlayers)
-                GunGame.Say(caller, "notenoughplayers", Color.green, GunGameConfig.instance.minPlayers - GameManager.OnlinePlayers.Count);
+            else if (Provider.clients.Count < GunGameConfig.instance.minPlayers)
+                GunGame.Say(caller, "notenoughplayers", Color.green, GunGameConfig.instance.minPlayers - Provider.clients.Count);
             else
                 GunGame.Say(caller, "next", Color.green, GameManager.GetTime());
         }
@@ -80,37 +83,36 @@ namespace GunGame.Commands
         }
     }
 
-    public class CommandStart : IGunGameCommand
+    public class CommandTimer : IGunGameCommand
     {
-        public string Help => "Starts the lobby timer.";
+        public string Help => "Starts or Stops the lobby timer.";
         public EPermissionLevel PermissionLevel => EPermissionLevel.HIGH;
         public ECommandTiming CommandTiming => ECommandTiming.STOPPED | ECommandTiming.RUNNING | ECommandTiming.WAITING;
         public void Execute(IRocketPlayer caller, string[] args)
         {
-            if (!GameManager.isStopped)
-                GunGame.Say(caller, "invalid_start", Color.red);
-            else
-            {
-                GameManager.isStopped = false;
-                GunGame.Say(caller, "start", Color.green);
-            }
-        }
-    }
+            if (args.Length == 0)
+                throw new GunGameException(EExceptionType.INVALID_ARGS);
 
-    public class CommandStop : IGunGameCommand
-    {
-        public string Help => "Stops the lobby timer.";
-        public EPermissionLevel PermissionLevel => EPermissionLevel.HIGH;
-        public ECommandTiming CommandTiming => ECommandTiming.RUNNING | ECommandTiming.WAITING;
-        public void Execute(IRocketPlayer caller, string[] args)
-        {
-            if (!GameManager.isStopped)
-            {
-                GameManager.isStopped = true;
-                GunGame.Say(caller, "stop", Color.green);
+            switch (args[0].ToLowerInvariant()) {
+                case "start":
+                    if (!GameManager.isStopped)
+                        GunGame.Say(caller, "invalid_start", Color.red);
+                    else {
+                        GameManager.isStopped = false;
+                        GunGame.Say(caller, "start", Color.green);
+                    }
+                    break;
+                case "stop":
+                    if (GameManager.isStopped)
+                        GunGame.Say(caller, "invalid_stop", Color.red);
+                    else {
+                        GameManager.isStopped = true;
+                        GunGame.Say(caller, "stop", Color.green);
+                    }
+                    break;
+
+                default: throw new GunGameException(EExceptionType.INVALID_ARGS);
             }
-            else
-                GunGame.Say(caller, "invalid_stop", Color.red);
         }
     }
 
@@ -125,7 +127,7 @@ namespace GunGame.Commands
                 throw new GunGameException(EExceptionType.INVALID_ARGS);
 
             if (CommandManager.TryGetCommand(args[0], out IGunGameCommand cmd))
-                if (caller.HasPermissionFor(cmd))
+                if (caller.HasGGPermissionFor(cmd))
                     GunGame.Say(caller, "help", Color.green, args[0], cmd.Help);
                 else
                     GunGame.Say(caller, "invalid_perms_help", Color.red);

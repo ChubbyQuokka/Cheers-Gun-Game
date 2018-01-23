@@ -9,7 +9,7 @@ namespace Rocket.API
 {
     public static class IRocketPlayerExtensions
     {
-        public static bool HasPermissionFor(this IRocketPlayer player, IGunGameCommand command)
+        public static bool HasGGPermissionFor(this IRocketPlayer player, IGunGameCommand command)
         {
             return (byte)command.PermissionLevel <= (byte)((UnturnedPlayer)player).GunGamePlayer().pLevel;
         }

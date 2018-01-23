@@ -8,6 +8,16 @@ namespace GunGame.Managers
 {
     public static class SQLManager
     {
+        public static class Constants
+        {
+            public const string CONNECTION = "SERVER={0}; DATABASE={1}; UID={2};PASSWORD={3};PORT={4};";
+            public const string SHOW_TABLES = "SHOW TABLES LIKE {0};";
+            public const string CREATE_TABLE = "CREATE TABLE `{0}` (`steamid` bigint NOT NULL UNIQUE,`kills` integer NOT NULL,`deaths` integer NOT NULL,`rounds` integer NOT NULL,`first` integer NOT NULL,`second` integer NOT NULL,`third` integer NOT NULL, PRIMARY KEY (`steamid`));";
+            public const string SELECT = "SELECT `kills`,`deaths`,`rounds`,`first`,`second`,`third` FROM `{0}` WHERE `steamid`='{1}'";
+            public const string INSERT = "INSERT INTO `{0}` VALUES('{1}','{2}','{3}','{4}','{5}','{6}','{7}')";
+            public const string UPDATE = "UPDATE `{0}` SET `kills`='{1}', `deaths`='{2}', `rounds`='{3}', `first`='{4}', `second`='{5}', `third`='{6}' WHERE `steamid`='{7}'";
+        }
+
         public static MySqlConnection Connection;
 
         static GunGameConfig.MySqlSettings settings;
@@ -17,19 +27,19 @@ namespace GunGame.Managers
             try
             {
                 settings = GunGameConfig.instance.sqlSettings;
-
-                Connection = new MySqlConnection($"SERVER={settings.address};DATABASE={settings.database};UID={settings.user};PASSWORD={settings.pass};PORT={settings.port};");
+                
+                Connection = new MySqlConnection(string.Format(Constants.CONNECTION, settings.address, settings.database, settings.user, settings.pass, settings.port));
 
                 MySqlCommand cmd = Connection.CreateCommand();
 
-                cmd.CommandText = $"show tables like '{settings.table}'";
+                cmd.CommandText = string.Format(Constants.SHOW_TABLES, settings.table);
 
                 Connection.Open();
 
                 if (cmd.ExecuteScalar() == null)
                 {
                     MySqlCommand cmd2 = Connection.CreateCommand();
-                    cmd2.CommandText = $"CREATE TABLE `{settings.table}` (`steamid` bigint NOT NULL UNIQUE,`kills` integer NOT NULL,`deaths` integer NOT NULL,`rounds` integer NOT NULL,`first` integer NOT NULL,`second` integer NOT NULL,`third` integer NOT NULL, PRIMARY KEY (`steamid`))";
+                    cmd2.CommandText = string.Format(Constants.CREATE_TABLE, settings.table);
                     cmd2.ExecuteNonQuery();
                 }
 
@@ -48,8 +58,8 @@ namespace GunGame.Managers
             PlayerQuery query = new PlayerQuery();
 
             MySqlCommand cmd = Connection.CreateCommand();
-
-            cmd.CommandText = $"SELECT `kills`,`deaths`,`rounds`,`first`,`second`,`third` FROM `{settings.table}` WHERE `steamid`='{steamId}'";
+            
+            cmd.CommandText = string.Format(Constants.SELECT, settings.table, steamId);
             Connection.Open();
             MySqlDataReader dr = cmd.ExecuteReader();
 
@@ -85,11 +95,11 @@ namespace GunGame.Managers
 
             if (query.isFirstQuery)
             {
-                cmd.CommandText = $"INSERT INTO `{settings.table}` VALUES ('{steamId}','{query.kills}','{query.deaths}','{query.rounds}','{query.first}','{query.second}','{query.third}')";
+                cmd.CommandText = string.Format(Constants.INSERT, settings.table, steamId, query.kills, query.deaths, query.rounds, query.first, query.second, query.third);
             }
             else
             {
-                cmd.CommandText = $"UPDATE `{settings.table}` SET `kills`='{query.kills}', `deaths`='{query.deaths}', `rounds`='{query.rounds}', `first`='{query.first}', `second`='{query.second}', `third`='{query.third}' WHERE `steamid`='{steamId}'";
+                cmd.CommandText = string.Format(Constants.UPDATE, settings.table, query.kills, query.deaths, query.rounds, query.first, query.second, query.third, steamId);
             }
 
             Connection.Open();
