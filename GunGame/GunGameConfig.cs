@@ -516,7 +516,7 @@ namespace GunGame
 
         public struct EconomySettings
         {
-            [JsonProperty(PropertyName = "MySqlEnabled")]
+            [JsonProperty(PropertyName = "Enabled")]
             public bool enabled;
 
             [JsonProperty(PropertyName = "Rewards")]
@@ -543,7 +543,7 @@ namespace GunGame
 
         public struct MySqlSettings
         {
-            [JsonProperty(PropertyName = "MySqlEnabled")]
+            [JsonProperty(PropertyName = "Enabled")]
             public bool enabled;
 
             [JsonProperty(PropertyName = "Database")]
