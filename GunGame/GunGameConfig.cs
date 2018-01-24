@@ -233,7 +233,7 @@ namespace GunGame
                         ref MySqlSettings sqlSettings = ref instance.sqlSettings;
 
                         //MySQL assignments
-                        Assign(sql, "MySqlEnabled", ref sqlSettings.enabled, Default.sqlSettings.enabled, ref hasDefaulted);
+                        Assign(sql, "Enabled", ref sqlSettings.enabled, Default.sqlSettings.enabled, ref hasDefaulted);
                         Assign(sql, "Database", ref sqlSettings.database, Default.sqlSettings.database, ref hasDefaulted);
                         Assign(sql, "Table", ref sqlSettings.table, Default.sqlSettings.table, ref hasDefaulted);
                         Assign(sql, "IP", ref sqlSettings.address, Default.sqlSettings.address, ref hasDefaulted);
