@@ -156,7 +156,7 @@ namespace GunGame
                     //Assign(jObj, "Lobby", ref instance.safezone, Default.safezone, ref hasDefaulted);
                     //Assign(jObj, "SpawnPositions", ref instance.positions, Default.positions);
 
-                    JObject lobby = (JObject)jObj["Lobby"];
+                    JObject lobby = (JObject)jObj["Safezone"];
 
                     if (lobby != null) {
                         instance.safezone = new SpawnPosition();
@@ -410,7 +410,7 @@ namespace GunGame
         [JsonProperty(PropertyName = "DisableCosmetics")]
         public bool disableCosmetics;
 
-        [JsonProperty(PropertyName = "Lobby")]
+        [JsonProperty(PropertyName = "Safezone")]
         public SpawnPosition safezone;
 
         [JsonProperty(PropertyName = "EconomySettings")]
