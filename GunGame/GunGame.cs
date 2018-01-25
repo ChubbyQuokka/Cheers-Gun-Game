@@ -137,29 +137,5 @@ namespace GunGame
             UnturnedChat.Say(instance.Translate(message, objs), color);
         }
     }
-
-    public class TestCommand : IRocketCommand
-    {
-        public AllowedCaller AllowedCaller => AllowedCaller.Player;
-
-        public string Name => "test";
-
-        public string Help => "";
-
-        public string Syntax => "";
-
-        public List<string> Aliases => new List<string>();
-
-        public List<string> Permissions => new List<string>();
-
-        public void Execute(IRocketPlayer caller, string[] command)
-        {
-            UnturnedPlayer p = (UnturnedPlayer)caller;
-
-            bool t = p.GunGamePlayer() == null;
-
-            UnturnedChat.Say(caller, t.ToString());
-        }
-    }
 }
 #pragma warning restore RECS0018
