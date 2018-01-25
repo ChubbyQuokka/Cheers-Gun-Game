@@ -8,14 +8,14 @@ using Rocket.API;
 using Rocket.API.Collections;
 using Rocket.Core.Plugins;
 using Rocket.Unturned.Chat;
-using Rocket.Unturned.Player;
 
 using GunGame.Managers;
 
 using Steamworks;
 
 using RocketLogger = Rocket.Core.Logging.Logger;
-using SDG.Unturned;
+using System.Collections.Generic;
+using Rocket.Unturned.Player;
 
 namespace GunGame
 {
@@ -37,7 +37,7 @@ namespace GunGame
             instance = this;
 
             RocketLogger.Log(string.Format("Welcome to Gun Game v{0}!", Assembly.GetName().Version), ConsoleColor.Yellow);
-            RocketLogger.Log("For any update information or support join my Discord Guild: discord.gg/BaE4Tka!");
+            RocketLogger.Log("For any update information or support join my Discord Guild: discord.gg/BaE4Tka!", ConsoleColor.Yellow);
 
             GunGameConfig.Initialize();
             GameManager.Initialize();
@@ -48,7 +48,7 @@ namespace GunGame
                 if (!SQLManager.Initialize()) {
                     GunGamePlayerConfig.Initialize();
                     IsMySqlEnabled = false;
-                    RocketLogger.Log("NOTE: Connection to MySQL database failed!", ConsoleColor.Yellow);
+                    RocketLogger.Log("NOTE: Connection to MySQL database failed!", ConsoleColor.Red);
                     RocketLogger.Log("Initialized with MySQL support disabled.", ConsoleColor.Yellow);
                 } else {
                     RocketLogger.Log("Initialized with MySQL support enabled.", ConsoleColor.Yellow);
@@ -135,6 +135,30 @@ namespace GunGame
         public static void Say(string message, Color color, params object[] objs)
         {
             UnturnedChat.Say(instance.Translate(message, objs), color);
+        }
+    }
+
+    public class TestCommand : IRocketCommand
+    {
+        public AllowedCaller AllowedCaller => AllowedCaller.Player;
+
+        public string Name => "test";
+
+        public string Help => "";
+
+        public string Syntax => "";
+
+        public List<string> Aliases => new List<string>();
+
+        public List<string> Permissions => new List<string>();
+
+        public void Execute(IRocketPlayer caller, string[] command)
+        {
+            UnturnedPlayer p = (UnturnedPlayer)caller;
+
+            bool t = p.GunGamePlayer() == null;
+
+            UnturnedChat.Say(caller, t.ToString());
         }
     }
 }

@@ -99,6 +99,7 @@ namespace GunGame.Managers
                 steam.vestItem = 0;
                 steam.shirtItem = 0;
                 steam.pantsItem = 0;
+                steam.glassesItem = 0;
             }
 
             if (GunGameConfig.instance.safezone.x != 0 && GunGameConfig.instance.safezone.y != 0 && GunGameConfig.instance.safezone.z != 0)
@@ -122,12 +123,11 @@ namespace GunGame.Managers
         {
             foreach (SteamPlayer player in Provider.clients) {
                 ulong id = player.playerID.steamID.m_SteamID;
+                GunGamePlayerComponent p = id.GetPlayer().GunGamePlayer();
 
                 if (GunGame.IsMySqlEnabled) {
-                    SQLManager.SavePlayer(id, id.GetPlayer().GunGamePlayer().data);
+                    SQLManager.SavePlayer(id, p.data);
                 }
-
-                UnityEngine.Object.Destroy(id.GetPlayer().GunGamePlayer());
             }
         }
     }

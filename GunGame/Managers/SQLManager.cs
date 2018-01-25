@@ -10,8 +10,8 @@ namespace GunGame.Managers
     {
         public static class Constants
         {
-            public const string CONNECTION = "SERVER={0}; DATABASE={1}; UID={2};PASSWORD={3};PORT={4};";
-            public const string SHOW_TABLES = "SHOW TABLES LIKE {0};";
+            public const string CONNECTION = "SERVER={0};DATABASE={1};UID={2};PASSWORD={3};PORT={4};";
+            public const string SHOW_TABLES = "SHOW TABLES LIKE '{0}';";
             public const string CREATE_TABLE = "CREATE TABLE `{0}` (`steamid` bigint NOT NULL UNIQUE,`kills` integer NOT NULL,`deaths` integer NOT NULL,`rounds` integer NOT NULL,`first` integer NOT NULL,`second` integer NOT NULL,`third` integer NOT NULL, PRIMARY KEY (`steamid`));";
             public const string SELECT = "SELECT `kills`,`deaths`,`rounds`,`first`,`second`,`third` FROM `{0}` WHERE `steamid`='{1}'";
             public const string INSERT = "INSERT INTO `{0}` VALUES('{1}','{2}','{3}','{4}','{5}','{6}','{7}')";
