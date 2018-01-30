@@ -5,5 +5,5 @@ using System.Reflection;
 [assembly: AssemblyCompany("52 Piece Games")]
 [assembly: AssemblyProduct("Cheers Gun Game")]
 [assembly: AssemblyCopyright("(c) 52 Piece Games 2018")]
-[assembly: AssemblyVersion("2.0.0.3")]
+[assembly: AssemblyVersion("2.0.0.4")]
 [assembly: NeutralResourcesLanguage("en-US")]

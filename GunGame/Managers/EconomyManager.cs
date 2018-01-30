@@ -59,7 +59,7 @@ namespace GunGame.Managers
 
                 if (reward.place != 0) {
                     ActiveHook.IncreaseBalance(p, reward.reward);
-                    GunGame.Say(p, "reward", Color.green, reward.reward.ToString() + reward.ordinal, place.ToString());
+                    GunGame.Say(p, "reward", Color.green, reward.reward.ToString(), place.ToString() + reward.ordinal);
                 }
             }
         }
