@@ -21,7 +21,7 @@ namespace GunGame
 
         public List<ulong> JoinedPlayers;
 
-        static string Directory = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Players.json";
+        public static string Directory = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Players.json";
 
         public static void Initialize()
         {
@@ -106,8 +106,8 @@ namespace GunGame
             }
         };
 
-        static string Directory = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Config.json";
-        static string DirectoryFail = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Config_";
+        public static string Directory = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Config.json";
+        public static string DirectoryFail = Rocket.Core.Environment.PluginsDirectory + "/GunGame/Config_";
 
 #pragma warning disable RECS0018 // Comparison of floating point numbers with equality operator
         public static void RegisterSpawnPosition(Vector3 vector, float rot)

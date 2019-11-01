@@ -14,8 +14,6 @@ using GunGame.Managers;
 using Steamworks;
 
 using RocketLogger = Rocket.Core.Logging.Logger;
-using System.Collections.Generic;
-using Rocket.Unturned.Player;
 
 namespace GunGame
 {
@@ -79,7 +77,7 @@ namespace GunGame
             isLoaded = false;
         }
 
-        void FixedUpdate()
+        public void FixedUpdate()
         {
             if (isLoaded)
                 GameManager.Update();

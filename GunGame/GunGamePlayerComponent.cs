@@ -24,14 +24,12 @@ namespace GunGame
 
         public EPermissionLevel pLevel;
 
-        void Start()
+        public void Start()
         {
-            bool isFirst = false;
-
             if (GunGame.IsMySqlEnabled) {
                 data = SQLManager.LoadPlayer(Player.CSteamID.m_SteamID);
             } else {
-                isFirst = !GunGamePlayerConfig.Contains(Player.CSteamID.m_SteamID);
+                _ = !GunGamePlayerConfig.Contains(Player.CSteamID.m_SteamID);
             }
 
             if (R.Permissions.HasPermission(Player, new List<string> { "gungame.high" })) {
@@ -84,7 +82,7 @@ namespace GunGame
             }
         }
 
-        void TeleportAfterRespawn()
+        public void TeleportAfterRespawn()
         {
             if (GameManager.isRunning) {
                 GunGameConfig.SpawnPosition sp = GameManager.GetSpawnPositionRR();
@@ -153,10 +151,10 @@ namespace GunGame
         public void GiveKit(byte kit)
         {
             kitRequest = kit;
-            Invoke("_GiveKit", GunGameConfig.instance.advSettings.kitTime);
+            Invoke("GiveKit", GunGameConfig.instance.advSettings.kitTime);
         }
 
-        void _GiveKit()
+        public void GiveKit()
         {
             Player.GiveItem(GunGameConfig.instance.weapons.hat, 1);
             Player.GiveItem(GunGameConfig.instance.weapons.mask, 1);
@@ -177,10 +175,10 @@ namespace GunGame
                 Player.Inventory.items[2].tryAddItem(mag);
             }
 
-            Invoke("_Equip", GunGameConfig.instance.advSettings.equipTime);
+            Invoke("Equip", GunGameConfig.instance.advSettings.equipTime);
         }
 
-        void _Equip()
+        public void Equip()
         {
             Player.Player.equipment.tryEquip(0, 0, 0);
         }
